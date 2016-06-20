@@ -77,4 +77,8 @@ delphes_card_ILD.tcl - An input to delphes simulating a detector which takes as 
 #3. ANALYZING SAMPLES
 The generate.sh process will save samples as delphes .root files in the output folder. Use these as an imput to sample analysis.
 
-Joey and Alex are currently working on an optimized sample analysis tool for flexibility and modularity.
+In analysis there are four files:
+rootlogon.C specifies the location of the delphes installation - change this once when starting to use the programs
+hist_process.C takes the delphes samples in the output folder, subjects them to various cuts and calcualtions, and outputs histograms of the leading di-particle reconstructed mass and recoil mass
+hist_functions.C is a helper file to histprocess, cointaing the cuts and calculations
+hist_draw.C takes the root file with the histograms that is outputed by histprocess and draws histograms of the reconstructed di-particle mass and missing mass.

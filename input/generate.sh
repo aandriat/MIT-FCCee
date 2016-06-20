@@ -1,19 +1,24 @@
 #!/bin/bash
 
-clear 
+clear
 
-process=eebb_uu #AAA
+process=eebb_uu_zh #AAA
 cme=350 #BBB
 numberevents=1000 #CCC
 folder=/afs/cern.ch/work/a/aandriat/public/autogen #DDD #Change this to match where you placed the input folder
 src=/afs/cern.ch/user/a/aandriat/CMSSW_7_6_3_patch2/src #Change this to match your install directory configuration and wherever $src is used throughout the file
 
+
+#Initializes Cross Section. This is not the final value!
+#Do not change
+xsec = -1.0 #Actual value will be read from .lhe file and printed to terminal
+
 function back {
-	cd $folder
+    cd $folder
 }
 
 function whizstart {
-	source $src/whizard/build/bin/whizard-setup.sh
+    source $src/whizard/build/bin/whizard-setup.sh
 }
 
 back
@@ -40,8 +45,23 @@ echo "This cds into the gen whizard location and generates whizard sample"
 cd whizard/gen
 whizstart
 whizard $process.sin
-back
 echo "Done generating"
+
+echo "Reading calculated cross section"
+filename=$process.lhe
+num=0
+while read -r line
+do
+    num=$((num+1))
+    IN="$line"
+    IFS='"'; arrIN=($IN); unset IFS
+    if [ "$num" -eq "8" ]; then       
+            # echo "${arrIN[3]}"
+            xsec=${arrIN[3]}
+            break
+    fi
+done < $filename
+back
 
 echo "This will move generated .lhe file into whizard location"
 mv whizard/gen/$process.lhe whizard
@@ -84,4 +104,7 @@ echo "This will delete all intermediate directories"
 rm -r -f whizard
 rm -r -f pythia
 rm -r -f delphes
+
+echo ""
+echo "The calculated cross section is: $xsec"
 back
