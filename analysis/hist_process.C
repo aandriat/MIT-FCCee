@@ -1,4 +1,4 @@
-// E+E- Delphes Sample Processing
+// E+E- Delphes Sample Processing for ee->bbvv final state
 // Alexander Andriatis and Joseph Curti
 // 20 June 2016
 
