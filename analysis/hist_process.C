@@ -1,6 +1,6 @@
 // E+E- Delphes Sample Processing for ee->bbvv final state
-// Alexander Andriatis
-// 17 June 2016
+// Alexander Andriatis and Joseph Curti
+// 20 June 2016
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
