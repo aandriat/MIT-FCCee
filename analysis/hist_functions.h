@@ -390,7 +390,7 @@ string hist_fill(TClonesArray *branch, T (*examplePart), TString parttype, TH1D*
     massHIST->Fill(sumparticleP4.M(), norm); // Fills histogram with mass of di-jet system
     recoilmassHIST->Fill(diffparticleP4.M(), norm); // Fills histogram with missing mass
 
-    return "filled";
+    return "fill";
 }
 
 // Draws histograms
@@ -411,6 +411,9 @@ void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > 
         TRandom1 r; 
         hist->SetLineColor(r.Integer(9)+1);
         hist->SetStats(kFALSE);
+        hist->SetName(filename);
+        hist->GetXaxis()->SetTitle("Di-Particle Mass (GeV)");
+        hist->GetYaxis()->SetTitle("Particle Count");
         hist->Draw("hist same");  
         leg->AddEntry(hist,namemasshist,"l");
     }
@@ -426,6 +429,9 @@ void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > 
         TRandom1 r; 
         hist->SetLineColor(r.Integer(9)+1);
         hist->SetStats(kFALSE);
+        hist->SetName(filename);
+        hist->GetXaxis()->SetTitle("Missing Mass (GeV)");
+        hist->GetYaxis()->SetTitle("Particle Count");
         hist->Draw("hist same");  
         leg2->AddEntry(hist,namerecoilmasshist,"l");
     }
