@@ -2,12 +2,12 @@
 
 clear
 
-process=eebb_uu #AAA
+process=eebb_uu_zh #AAA
 cme=350 #BBB
 numberevents=1000 #CCC
 folder=/afs/cern.ch/work/a/aandriat/public/autogen #DDD #Change this to match where you placed the input folder
 src=/afs/cern.ch/user/a/aandriat/CMSSW_7_6_3_patch2/src #Change this to match your install directory configuration and wherever $src is used throughout the file
-
+xfilename=output/cross_sections.txt #Defines the place to store cross section info
 
 #Initializes Cross Section. This is not the final value!
 #Do not change
@@ -104,7 +104,8 @@ echo "This will delete all intermediate directories"
 rm -r -f whizard
 rm -r -f pythia
 rm -r -f delphes
-
-echo ""
-echo "The calculated cross section is: $xsec"
 back
+
+echo "The calculated cross section for process $process is: $xsec" >> $xfilename
+back
+echo "Done"
