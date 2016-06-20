@@ -392,3 +392,45 @@ string hist_fill(TClonesArray *branch, T (*examplePart), TString parttype, TH1D*
 
     return "filled";
 }
+
+// Draws histograms
+void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > samples){
+    TFile *f = new TFile(filename); // Specifies the root file which contains the generated histograms
+
+    // Plots the signal and background di-particle mass and missing mass
+    TCanvas *can = new TCanvas(filename, filename, 1280, 720);
+    can->Divide(1,2);
+
+    can->cd(1);
+    TLegend* leg = new TLegend(0.13,0.79,0.25,0.89);
+    for(Int_t i=1; i < samples.size()+1; i++){
+        std::pair<TString, Double_t> sample = samples[i];
+        TString masshist = "_massHIST";
+        TString namemasshist = sample.first + masshist;
+        TH1D* hist = (TH1D*)f->Get(namemasshist);
+        TRandom1 r; 
+        hist->SetLineColor(r.Integer(9)+1);
+        hist->SetStats(kFALSE);
+        hist->Draw("hist same");  
+        leg->AddEntry(hist,namemasshist,"l");
+    }
+    leg->Draw("same");
+
+    can->cd(2);
+    TLegend* leg2 = new TLegend(0.13,0.79,0.25,0.89);
+    for(Int_t i=1; i < samples.size()+1; i++){
+        std::pair<TString, Double_t> sample = samples[i];
+        TString recoilmasshist = "_recoilmassHIST";
+        TString namerecoilmasshist = sample.first + recoilmasshist;
+        TH1D* hist = (TH1D*)f->Get(namerecoilmasshist);
+        TRandom1 r; 
+        hist->SetLineColor(r.Integer(9)+1);
+        hist->SetStats(kFALSE);
+        hist->Draw("hist same");  
+        leg2->AddEntry(hist,namerecoilmasshist,"l");
+    }
+    leg2->Draw("same");
+
+    // Saves as PDF
+    can->Print("",".pdf");
+}
