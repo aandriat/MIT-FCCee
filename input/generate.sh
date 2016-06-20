@@ -2,7 +2,7 @@
 
 clear
 
-process=eebb_uu_zh #AAA
+process=eebb_uu #AAA
 cme=350 #BBB
 numberevents=1000 #CCC
 folder=/afs/cern.ch/work/a/aandriat/public/autogen #DDD #Change this to match where you placed the input folder

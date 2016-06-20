@@ -1,6 +1,6 @@
-// E+E- Delphes Sample Processing for ee->bbvv final state
-// Alexander Andriatis
-// 17 June 2016
+// E+E- Delphes Sample Processing
+// Alexander Andriatis and Joseph Curti
+// 20 June 2016
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
@@ -38,7 +38,9 @@ using namespace std;
 
 // Takes as input a given process with corresponding luminosity, as well as sample CME, cuts, directory location, and output file name - saves corresponding histogram in root file.
 void processsimulation(std::pair<TString, Double_t> sample, TString filename, std::map<TString, Int_t> precut, std::map<TString, Int_t> cut, std::map<TString, Int_t> particletype, TLorentzVector CME, Int_t luminosity, TString directory){
-	TString root = ".root";
+	
+    // Defines which sample to read from
+    TString root = ".root";
 	TString samplename = directory + sample.first + root;
 	TChain chain("Delphes");
     chain.Add(samplename); 
@@ -49,7 +51,7 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
     TString recoilmasshist = "_recoilmassHIST";
     TString namemasshist = sample.first + masshist;
     TString namerecoilmasshist = sample.first + recoilmasshist;
-    TH1D* massHIST = new TH1D(namemasshist, namemasshist, numbins, 0, CME.M()); // Histogram of visible di-jet mass
+    TH1D* massHIST = new TH1D(namemasshist, namemasshist, numbins, 0, CME.M()); // Histogram of visible di-particle mass
     TH1D* recoilmassHIST = new TH1D(namerecoilmasshist, namerecoilmasshist, numbins, 0, CME.M()); // Histogram of missing mass
 
     //Branches to be read from the collision file
@@ -61,7 +63,6 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
     TClonesArray *branchTrack = treeReader->UseBranch("Track");
 
     // Variables to store particles
-    // These are only needed to pass the 
     Electron *electron = 0;
     Muon *muon = 0;
     Jet *jet = 0;
@@ -77,26 +78,24 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
 		treeReader->ReadEntry(iEntry);
 
         if (particletype["muon"]==1){
-            //Recoil Mass and event selection process on Electrons
-            skip = hist_fill(massHIST, recoilmassHIST, norm_const, branchTrack, branchTower, branchJet, branchPhoton, branchMuon, muon, precut, cut, CME, "muon", iEntry);
+            // Event selection process on Muons
+            skip = hist_fill(branchMuon, muon, "muon", massHIST, recoilmassHIST, norm_const, branchTrack, branchTower, branchJet, branchPhoton,  precut, cut, CME);
             if (skip == "fill" || skip == "skip") continue;
         }
 
         if (particletype["electron"]==1){
-            //Recoil Mass and event selection process on Electrons
-            skip = hist_fill(massHIST, recoilmassHIST, norm_const, branchTrack, branchTower, branchJet, branchPhoton, branchElectron, electron, precut, cut, CME, "electon", iEntry);
+            // Event selection process on Electrons
+            skip = hist_fill(branchElectron, electron, "electron", massHIST, recoilmassHIST, norm_const, branchTrack, branchTower, branchJet, branchPhoton, precut, cut, CME);
             if (skip == "fill" || skip == "skip") continue;
         }
 
         if (particletype["jet"]==1){
-            //Recoil Mass and event selection process on Electrons
-            skip = hist_fill(massHIST, recoilmassHIST, norm_const, branchTrack, branchTower, branchJet, branchPhoton, branchJet, jet, precut, cut, CME, "jet", iEntry);
+            // Event selection process on Jets
+            skip = hist_fill(branchJet, jet, "jet", massHIST, recoilmassHIST, norm_const, branchTrack, branchTower, branchJet, branchPhoton, precut, cut, CME);
             if (skip == "fill" || skip == "skip") continue;
         }
-
     }
-
-        // Writes the histograms to a root file
+    // Writes the histograms to a root file
     TFile f(filename,"update");
     massHIST->Write();
     recoilmassHIST->Write();
@@ -110,12 +109,12 @@ void hist_process(){
 	TString filename = "eebb.root"; // Filename for created histogram collection
 	TString directory = "/afs/cern.ch/work/a/aandriat/public/autogen/output/"; // Directory of stored delphes samples
 
-	std::map<TString, Int_t> precut ={ // Initializes precuts {cut number, 1 = on}
+	std::map<TString, Int_t> precut ={ // Initializes precuts {cut name, 1 = on}
     { "numjets", 1 },
     { "isoparticles", 1 }
 	};
 
-	std::map<TString, Int_t> cut ={ // Initializes cuts {cut number, 1 = on}
+	std::map<TString, Int_t> cut ={ // Initializes cuts {cut name, 1 = on}
     { "photon", 0 },
     { "charge", 0 },
     { "zmass", 0 },
@@ -150,9 +149,11 @@ void hist_process(){
     { "jet", 1 }
     };
 
-    // Runs over all selected samples and creates histograms of di-jet and missing mass
+    // Runs over all selected samples and creates histograms of di-particle mass and missing mass
 	for(Int_t i=1; i < samples.size()+1; i++){
 		processsimulation(samples[i],filename, precut, cut, particletype, CME, luminosity, directory);
 	}
+
+    hist_draw(filename, samples); // Crudely plots all histograms and saves as PDF
 }
 

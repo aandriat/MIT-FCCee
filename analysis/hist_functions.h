@@ -1,7 +1,7 @@
-//Helper functions used in recoil mass macros
-//Implements many event selection cuts currently used in my Higgs to Invisible Study
-//Joseph Curti
-//17 June 2016
+//Helper functions to hist_process.C
+//Implements mass calculation and selection cuts
+//Joseph Curti and Alexander Andriatis
+//20 June 2016
 
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -24,10 +24,12 @@
 #include <fstream>              //   |
 #include <TString.h>            //   |
 #include <TLorentzVector.h>     //   |
-#include "TMath.h"              //  -
+#include <TMath.h>              //  -
 #include <TLatex.h> 
 #include <TPaveText.h>
 #include <utility>
+#include <TRandom1.h>
+
 
 #include "modules/Delphes.h"                   //   |
 #include "ExRootAnalysis/ExRootTreeReader.h"   //   -  Include needed delphes headers
@@ -38,6 +40,7 @@
 using namespace TMath;
 using namespace std;
 
+// Defines fixed particle mases
 Double_t MASS_Z = 91.1876;
 Double_t MASS_H = 125.09;
 
@@ -118,6 +121,30 @@ Int_t is_FSR(Double_t ph_eta, Double_t ph_phi, Double_t eta1, Double_t phi1, Dou
     return result;
 }
 
+Bool_t isoleptons(TClonesArray *branchTrack, TClonesArray *branchTower){
+    // Checks if event contains an isolated lepton
+    Bool_t skip = kFALSE;
+    TLorentzVector trackP4, towerP4;
+    Tower *tower = 0;
+    Track *track = 0;
+    for (Int_t iTrack = 0; iTrack < branchTrack->GetEntries(); iTrack++){
+        track = (Track*) branchTrack->At(iTrack);
+        if (track->PID != 11 or track->PID != -11 or track->PID != 13 or track->PID != -13) continue;
+        skip = kTRUE;
+        for (Int_t iTower = 0; iTower < branchTower->GetEntries(); iTower++){
+            tower = (Tower*) branchTower->At(iTower);
+            trackP4 = track->P4();
+            towerP4 = tower->P4();
+            if (trackP4.Angle(towerP4.Vect()) < 25){ //If particle has a particle within 25 degrees  from itself, it is not isolated 
+                skip = kFALSE;
+                return skip;
+            }
+        }
+    }
+    return skip;
+}
+        
+
 template<typename T>
 std::pair<Int_t, Int_t> select_2_leading(TClonesArray *branch, T (*examplePart), Int_t PT_cut = 1){
     //Loops through the event branch of particle type 'part_type' (typically electrons or muons)
@@ -160,6 +187,7 @@ std::pair<Int_t, Int_t> select_2_leading(TClonesArray *branch, T (*examplePart),
 
 template<typename T>
 std::pair<Int_t, Int_t> select_2_higgs(TClonesArray *branch, T (*examplePart), TLorentzVector CME){
+    // Selects the pair of particles in an event whos combined four-vector results in a mass closest to the Higgs.
     Int_t index1 = -1;
     Int_t index2 = -1;
     T *part = 0, *part2 = 0, *partSel1 = 0, *partSel2 = 0;
@@ -191,7 +219,7 @@ std::pair<Int_t, Int_t> select_2_higgs(TClonesArray *branch, T (*examplePart), T
 }
 
 template<typename T>
-string hist_fill(TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArray *branchTrack, TClonesArray *branchTower, TClonesArray *branchJet, TClonesArray *branchPhoton, TClonesArray *branch, T (*examplePart), std::map<TString, Int_t> precut, std::map<TString, Int_t> cut, TLorentzVector CME, TString parttype, Int_t iEntry){
+string hist_fill(TClonesArray *branch, T (*examplePart), TString parttype, TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArray *branchTrack, TClonesArray *branchTower, TClonesArray *branchJet, TClonesArray *branchPhoton, std::map<TString, Int_t> precut, std::map<TString, Int_t> cut, TLorentzVector CME){
     //If any selection cut is not met "skip" is returned
     //If the event meets the requirements and the hist was filled successfully
     //  "filled" is returned
@@ -213,55 +241,38 @@ string hist_fill(TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArr
 
     // Pre Cuts
     if(precut["numjets"]==1){ 
-        // PreCut 1: Removes events with less than 2 jets
+        // Removes events with less than 2 jets
         if (branch->GetEntries() < 2) return "skip";
     }
 
-    if(precut["isoparticles"]==1){
-        // PreCut 2: Removes events with isolated particles
-        for (Int_t iTrack = 0; iTrack < branchTrack->GetEntries(); iTrack++){
-            track = (Track*) branchTrack->At(iTrack);
-            if (track->PID != 11 or track->PID != -11 or track->PID != 13 or track->PID != -13) continue;
-            skip = kTRUE;
-            for (Int_t iTower = 0; iTower < branchTower->GetEntries(); iTower++){
-                tower = (Tower*) branchTower->At(iTower);
-                trackP4 = track->P4();
-                towerP4 = tower->P4();
-                if (trackP4.Angle(towerP4.Vect()) < 25){ //If particle has a particle within 25 degrees  from itself, it is not isolated 
-                    skip = kFALSE;
-                }
-                if (skip == kFALSE) return "skip";
-            }
-        }
+    if(precut["isoleptons"]==1){
+        // Removes events with isolated particles
+        skip = isoleptons(branchTrack, branchTower);
+        if (skip == kTRUE) return "skip";
     }
 
+    // Leading Particle Selection
     if (parttype == "electron" || parttype == "muon") {chosen = select_2_leading(branch, particle);}
 
     if (parttype == "jet") {chosen = select_2_higgs(branch, particle, CME);}
 
     if (chosen.first == -1 || chosen.second == -1) {//-1 if one was not chosen
-        return "none";
-    } //If either particle was not chosen that does not select
-    else{
-        particleSel1 = (T*) branch->At(chosen.first);
-        particleSel2 = (T*) branch->At(chosen.second);
-        particle1P4 = particleSel1->P4();
-        particle2P4 = particleSel2->P4();
+        return "none"; //If either particle was not chosen that does not select
     }
+
+    particleSel1 = (T*) branch->At(chosen.first);
+    particleSel2 = (T*) branch->At(chosen.second);
+    particle1P4 = particleSel1->P4();
+    particle2P4 = particleSel2->P4();
 
     sumparticleP4 = particleSel1->P4() + particleSel2->P4();
     diffparticleP4 = CME-sumparticleP4;
 
-    for (Int_t iTower = 0; iTower < branchTower->GetEntries(); iTower++){ // Sum of visible mass - used for cuts
-        tower = (Tower*) branchTower->At(iTower);
-        sumallP4 += tower->P4();
-    }
+    // Cuts
 
-    Jet *jetSel1 = dynamic_cast<Jet*> (particleSel1);
-    Jet *jetSel2 = dynamic_cast<Jet*> (particleSel2);
-
-
-    //cuts
+//----------------------
+    // Cuts for Joey H->Invisible Sutdy
+//----------------------
 
     if (cut["photon"]==1){
         //Gets number of photons with at least 10 GeV PT. First int is number and Second is index which is relevant
@@ -288,7 +299,6 @@ string hist_fill(TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArr
         else if (FSR == 2) 
             particle2P4 += photonP4;   
     }
-
 
     if (cut["zmass"]==1){
         //candidate z boson must be within 4 GeV of actual Z boson mass
@@ -320,6 +330,18 @@ string hist_fill(TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArr
         if (diparticlePL >= 50) return "skip"; //particle pair PL must be < 50 GeV
     }
 
+//----------------------------
+    // Cuts for Alex h->bbnunu study
+//---------------------------- 
+
+    for (Int_t iTower = 0; iTower < branchTower->GetEntries(); iTower++){ // Sum of visible mass - used for cuts
+        tower = (Tower*) branchTower->At(iTower);
+        sumallP4 += tower->P4();
+    }
+
+    Jet *jetSel1 = dynamic_cast<Jet*> (particleSel1);
+    Jet *jetSel2 = dynamic_cast<Jet*> (particleSel2);
+
     if(cut["vismass"]==1){
         // Cut 1: Visible mass consistent with mh-20 GeV < mvis < mh+10 GeV
         if (sumparticleP4.M() < 125-20 || sumparticleP4.M() > 125+10) return "skip";
@@ -340,11 +362,6 @@ string hist_fill(TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArr
     if(cut["anglecut"] == 1){
         // Cut 6: Azimuthal angle must be small (costheta<0.95)
         if (particle1P4.CosTheta() > 0.95 || particle2P4.CosTheta() > 0.95) return "skip";
-    }
-    
-    if (cut["numtracks"] == 1){
-        // Cut 7: Limit on number of charged tracks 10 < Ncharged < 40
-        if (jetSel1->NCharged > 40 || jetSel1->NCharged < 10 || jetSel2->NCharged > 40 || jetSel2->NCharged < 10) return "skip";
     }
     if (cut["numevis"] == 1){
         // Cut 8: 100 < Evis < 300
@@ -374,4 +391,46 @@ string hist_fill(TH1D* massHIST, TH1D* recoilmassHIST, Double_t norm, TClonesArr
     recoilmassHIST->Fill(diffparticleP4.M(), norm); // Fills histogram with missing mass
 
     return "filled";
+}
+
+//Main Function
+void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > samples){
+    TFile *f = new TFile(filename); // Specifies the root file which contains the generated histograms
+
+    // Plots the signal and background di-particle mass and missing mass
+    TCanvas *can = new TCanvas(filename, filename, 1280, 720);
+    can->Divide(1,2);
+
+    can->cd(1);
+    TLegend* leg = new TLegend(0.13,0.79,0.25,0.89);
+    for(Int_t i=1; i < samples.size()+1; i++){
+        std::pair<TString, Double_t> sample = samples[i];
+        TString masshist = "_massHIST";
+        TString namemasshist = sample.first + masshist;
+        TH1D* hist = (TH1D*)f->Get(namemasshist);
+        TRandom1 r; 
+        hist->SetLineColor(r.Integer(9)+1);
+        hist->SetStats(kFALSE);
+        hist->Draw("hist same");  
+        leg->AddEntry(hist,namemasshist,"l");
+    }
+    leg->Draw("same");
+
+    can->cd(2);
+    TLegend* leg2 = new TLegend(0.13,0.79,0.25,0.89);
+    for(Int_t i=1; i < samples.size()+1; i++){
+        std::pair<TString, Double_t> sample = samples[i];
+        TString recoilmasshist = "_recoilmassHIST";
+        TString namerecoilmasshist = sample.first + recoilmasshist;
+        TH1D* hist = (TH1D*)f->Get(namerecoilmasshist);
+        TRandom1 r; 
+        hist->SetLineColor(r.Integer(9)+1);
+        hist->SetStats(kFALSE);
+        hist->Draw("hist same");  
+        leg2->AddEntry(hist,namerecoilmasshist,"l");
+    }
+    leg2->Draw("same");
+
+    // Saves as PDF
+    can->Print("",".pdf");
 }
