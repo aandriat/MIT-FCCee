@@ -1,7 +1,7 @@
 //Helper functions used in recoil mass macros
 //Implements many event selection cuts currently used in my Higgs to Invisible Study
-//Joseph Curti
-//17 June 2016
+//Joseph Curti and Alexander Andriatis
+//20 June 2016
 
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
