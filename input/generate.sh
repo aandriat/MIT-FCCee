@@ -66,6 +66,10 @@ back
 echo "This will move generated .lhe file into whizard location"
 mv whizard/gen/$process.lhe whizard
 back
+echo "This will delete gen directory"
+rm -r -f whizard/gen
+back
+
 
 echo "This will copy pythia card into pythia"
 cp input/main41.cc $src/pythia/pythia8212/examples
@@ -100,12 +104,7 @@ echo "This copies the delphes sample into folder output"
 cp delphes/$process.root output
 back
 
-echo "This will delete all intermediate directories"
-rm -r -f whizard
-rm -r -f pythia
-rm -r -f delphes
-back
-
-echo "The calculated cross section for process $process is: $xsec" >> $xfilename
+echo "The calculated cross section for process $process is: $xsec"
+echo "($process, $xsec)" >> $xfilename
 back
 echo "Done"
