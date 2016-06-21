@@ -91,6 +91,10 @@ echo "This will copy delphes card into its location"
 cp input/delphes_card_ILD.tcl $src/delphes/cards
 back
 
+echo "This deletes the old root file if it exists"
+rm delphes/$process.root
+back
+
 echo "This will cd into delphes and make sample"
 cd $src/delphes
 ./DelphesHepMC cards/delphes_card_ILD.tcl $folder/delphes/$process.root $folder/pythia/$process.dat
