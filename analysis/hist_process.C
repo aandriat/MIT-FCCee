@@ -53,6 +53,10 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
     TString namerecoilmasshist = sample.first + recoilmasshist;
     TH1D* massHIST = new TH1D(namemasshist, namemasshist, numbins, 0, CME.M()); // Histogram of visible di-particle mass
     TH1D* recoilmassHIST = new TH1D(namerecoilmasshist, namerecoilmasshist, numbins, 0, CME.M()); // Histogram of missing mass
+    TH1D* data_obs = new TH1D("data_obs", "data_obs", numbins, 0, CME.M());
+    TH1D* recoil_data_obs = new TH1D("recoil_data_obs", "recoil_data_obs", numbins, 0, CME.M());
+   
+
 
     //Branches to be read from the collision file
     TClonesArray *branchMuon = treeReader->UseBranch("Muon");
@@ -96,22 +100,34 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
         }
     }
     // Writes the histograms to a root file
-    TFile f(filename,"update");
+    
+    *data_obs = *massHIST;
+    data_obs->SetName("data_obs");
+    TString massfilename = filename + masshist + root;
+    TFile f(massfilename,"update");
     massHIST->Write();
-    recoilmassHIST->Write();
+    data_obs->Write();
     f.Close();
+
+    *recoil_data_obs = *recoilmassHIST;
+    recoil_data_obs->SetName("data_obs");
+    TString recoilmassfilename = filename + recoilmasshist + root;
+    TFile g(recoilmassfilename,"update");
+    recoilmassHIST->Write();
+    recoil_data_obs->Write();
+    g.Close();
 }
 
 // For a simulated collision with multiple physics processes as individual delphes files, calculates relevant histograms into one root file. 
 void hist_process(){
 	TLorentzVector CME = {0,0,0,350}; // Defines center of mass energy
 	Int_t luminosity = 2600; // Defines luminosity
-	TString filename = "eebb.root"; // Filename for created histogram collection
+	TString filename = "eebb_350"; // Filename for created histogram collection
 	TString directory = "/afs/cern.ch/work/a/aandriat/public/autogen/output/"; // Directory of stored delphes samples
 
 	std::map<TString, Int_t> precut ={ // Initializes precuts {cut name, 1 = on}
     { "numjets", 1 },
-    { "isoparticles", 1 }
+    { "isoparticles", 0 }
 	};
 
 	std::map<TString, Int_t> cut ={ // Initializes cuts {cut name, 1 = on}
@@ -135,13 +151,21 @@ void hist_process(){
 	};
 
     std::map<Int_t, std::pair<TString, Double_t> > samples ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
-    { 1, std::pair<TString, Double_t> ("eebb_uu", 52.26)},
-    { 2, std::pair<TString, Double_t> ("eebb_uu_zh", 26.97)}
+    { 1, std::pair<TString, Double_t> ("eebb_uu_350", 52.30)},
+    { 2, std::pair<TString, Double_t> ("eebb_uu_zh_350", 27.06)},
+    { 3, std::pair<TString, Double_t> ("eebb_uu_ww_350", 52.30-27.06)}
     };
-    // ("eebb_uu_10_240", 45.8)
-    // ("eebb_uu_zh_10_240", 39.9)
-    // ("eebb_uu_10_350", 52.2)
-    // ("eebb_uu_zh_10_350", 26.9)
+    // ("eebb_uu_240", 45.86)
+    // ("eebb_uu_zh_240", 39.78)
+    // ("eebb_uu_ww_240", 45.86-39.78)
+    // ("eebb_uu_350", 52.30)
+    // ("eebb_uu_zh_350", 27.06)
+    // ("eebb_uu_ww_350", 52.30-27.06)
+
+    // { 1, std::pair<TString, Double_t> ("eebb_uu_240", 45.86)},
+    // { 2, std::pair<TString, Double_t> ("eebb_uu_zh_240", 39.78)},
+    // { 3, std::pair<TString, Double_t> ("eebb_uu_ww_240", 45.86-39.78)}
+
 
     std::map<TString, Int_t> particletype ={ // Initializes particles {particle type, 1 = on}
     { "muon", 0 },

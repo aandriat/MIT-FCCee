@@ -1,17 +1,15 @@
 #!/bin/bash
 
-clear
-
-process=eebb_uu_zh #AAA
-cme=350 #BBB
-numberevents=1000 #CCC
+process=eebb_uu_ww_350 #AAA
+cme=350  #BBB
+numberevents=10000 #CCC
 folder=/afs/cern.ch/work/a/aandriat/public/autogen #DDD #Change this to match where you placed the input folder
 src=/afs/cern.ch/user/a/aandriat/CMSSW_7_6_3_patch2/src #Change this to match your install directory configuration and wherever $src is used throughout the file
 xfilename=output/cross_sections.txt #Defines the place to store cross section info
 
 #Initializes Cross Section. This is not the final value!
 #Do not change
-xsec = -1.0 #Actual value will be read from .lhe file and printed to terminal
+xsec=1.0 #Actual value will be read from .lhe file and printed to terminal
 
 function back {
     cd $folder
@@ -66,10 +64,6 @@ back
 echo "This will move generated .lhe file into whizard location"
 mv whizard/gen/$process.lhe whizard
 back
-echo "This will delete gen directory"
-rm -r -f whizard/gen
-back
-
 
 echo "This will copy pythia card into pythia"
 cp input/main41.cc $src/pythia/pythia8212/examples
@@ -91,10 +85,6 @@ echo "This will copy delphes card into its location"
 cp input/delphes_card_ILD.tcl $src/delphes/cards
 back
 
-echo "This deletes the old root file if it exists"
-rm delphes/$process.root
-back
-
 echo "This will cd into delphes and make sample"
 cd $src/delphes
 ./DelphesHepMC cards/delphes_card_ILD.tcl $folder/delphes/$process.root $folder/pythia/$process.dat
@@ -108,7 +98,12 @@ echo "This copies the delphes sample into folder output"
 cp delphes/$process.root output
 back
 
+echo "This will delete all intermediate directories"
+rm -r -f whizard/gen
+rm -r -f delphes
+back
+
 echo "The calculated cross section for process $process is: $xsec"
-echo "($process, $xsec)" >> $xfilename
+echo "( $process, $xsec)" >> $xfilename
 back
 echo "Done"

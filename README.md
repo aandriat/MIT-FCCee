@@ -9,7 +9,7 @@ Kevin Tang
 Molly Kaplan
 Andres Rios
 
-The current functionality of this repository is sample generation using whizard,pythia,and delphes for e+e- simulation
+The current functionality of this repository is sample generation using whizard,pythia,and delphes for e+e- simulation, histogram drawing, cross section and coupling uncertainties
 
 
 --SAMPLE GENERATION INSTRUCTIONS--
@@ -75,9 +75,15 @@ delphes_card_ILD.tcl - An input to delphes simulating a detector which takes as 
 
 
 #3. ANALYZING SAMPLES
-The generate.sh process will save samples as delphes .root files in the output folder. Use these as an imput to sample analysis.
+The generate.sh process will save samples as delphes .root files in the output folder. Use these as an imput to sample analysis. Also saves cross sections for each process in cross_sections.txt
 
 In analysis there are four files:
 rootlogon.C specifies the location of the delphes installation - change this once when starting to use the programs
 hist_process.C takes the delphes samples in the output folder, subjects them to various cuts and calcualtions, and outputs histograms of the leading di-particle reconstructed mass and recoil mass.
 hist_functions.C is a helper file to histprocess, cointaing the cuts and calculations
+
+#4. MAKING HISTOGRAMS
+hist_draw.C includes many stylistic choices for attractive histogram generation and should serve as a platform for case-by-case drawing needs
+
+#5. CROSS SECTION AND COUPLING UNCERTAINTY
+xsection.sh and coupling.sh are simple commands to save cd time between sample and process. Hopefully will become more automated with future updates

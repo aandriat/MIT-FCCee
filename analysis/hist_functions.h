@@ -395,7 +395,15 @@ string hist_fill(TClonesArray *branch, T (*examplePart), TString parttype, TH1D*
 
 // Draws histograms
 void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > samples){
-    TFile *f = new TFile(filename); // Specifies the root file which contains the generated histograms
+
+    TString root = ".root";
+    TString masshist = "_massHIST";
+    TString recoilmasshist = "_recoilmassHIST";
+    TString massfilename = filename + masshist + root;
+    TString recoilmassfilename = filename + recoilmasshist + root;
+
+    TFile *f = new TFile(massfilename); // Specifies the root file which contains the generated histograms
+    TFile *g = new TFile(recoilmassfilename);
 
     // Plots the signal and background di-particle mass and missing mass
     TCanvas *can = new TCanvas(filename, filename, 1280, 720);
@@ -411,7 +419,7 @@ void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > 
         TRandom1 r; 
         hist->SetLineColor(r.Integer(9)+1);
         hist->SetStats(kFALSE);
-        hist->SetName(filename);
+        hist->SetName(massfilename);
         hist->GetXaxis()->SetTitle("Di-Particle Mass (GeV)");
         hist->GetYaxis()->SetTitle("Particle Count");
         hist->Draw("hist same");  
@@ -425,11 +433,11 @@ void hist_draw(TString filename, std::map<Int_t, std::pair<TString, Double_t> > 
         std::pair<TString, Double_t> sample = samples[i];
         TString recoilmasshist = "_recoilmassHIST";
         TString namerecoilmasshist = sample.first + recoilmasshist;
-        TH1D* hist = (TH1D*)f->Get(namerecoilmasshist);
+        TH1D* hist = (TH1D*)g->Get(namerecoilmasshist);
         TRandom1 r; 
         hist->SetLineColor(r.Integer(9)+1);
         hist->SetStats(kFALSE);
-        hist->SetName(filename);
+        hist->SetName(recoilmassfilename);
         hist->GetXaxis()->SetTitle("Missing Mass (GeV)");
         hist->GetYaxis()->SetTitle("Particle Count");
         hist->Draw("hist same");  
