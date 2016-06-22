@@ -2,6 +2,8 @@
 // Alexander Andriatis and Joseph Curti
 // 20 June 2016
 
+// Takes a collection of delphes samples and creates a single .root collection of histograms as well as a crudely generated histogram collection for initial analysis
+
 #if !defined(__CINT__) || defined(__MAKECINT__)
 
 #include <TROOT.h>              //  -
@@ -101,20 +103,14 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
     }
     // Writes the histograms to a root file
     
-    *data_obs = *massHIST;
-    data_obs->SetName("data_obs");
     TString massfilename = filename + masshist + root;
     TFile f(massfilename,"update");
     massHIST->Write();
-    data_obs->Write();
     f.Close();
 
-    *recoil_data_obs = *recoilmassHIST;
-    recoil_data_obs->SetName("data_obs");
     TString recoilmassfilename = filename + recoilmasshist + root;
     TFile g(recoilmassfilename,"update");
     recoilmassHIST->Write();
-    recoil_data_obs->Write();
     g.Close();
 }
 
@@ -122,22 +118,15 @@ void processsimulation(std::pair<TString, Double_t> sample, TString filename, st
 void hist_process(){
 	TLorentzVector CME = {0,0,0,350}; // Defines center of mass energy
 	Int_t luminosity = 2600; // Defines luminosity
-	TString filename = "eebb_350"; // Filename for created histogram collection
-	TString directory = "/afs/cern.ch/work/a/aandriat/public/autogen/output/"; // Directory of stored delphes samples
+	TString filename = "process"; // Filename for created histogram collection
+	TString directory = "GENERATIONPATH/delphes/"; // Directory of stored delphes samples
 
 	std::map<TString, Int_t> precut ={ // Initializes precuts {cut name, 1 = on}
-    { "numjets", 1 },
+    { "numjets", 0 },
     { "isoparticles", 0 }
 	};
 
 	std::map<TString, Int_t> cut ={ // Initializes cuts {cut name, 1 = on}
-    { "photon", 0 },
-    { "charge", 0 },
-    { "zmass", 0 },
-    { "labangle", 0 },
-    { "acoangle", 0 },
-    { "diparticlept", 0 },
-    { "diparticlepl", 0 },
     { "vismass", 0 },
     { "visenergy", 0 },
     { "vispt", 0 },
@@ -151,26 +140,15 @@ void hist_process(){
 	};
 
     std::map<Int_t, std::pair<TString, Double_t> > samples ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
-    { 1, std::pair<TString, Double_t> ("eebb_uu_350", 52.30)},
-    { 2, std::pair<TString, Double_t> ("eebb_uu_zh_350", 27.06)},
-    { 3, std::pair<TString, Double_t> ("eebb_uu_ww_350", 52.30-27.06)}
+    { 1, std::pair<TString, Double_t> ("process_signal", 26.98)},
+    { 2, std::pair<TString, Double_t> ("process_background1", 52.15)},
+    { 3, std::pair<TString, Double_t> ("process_background2", 66.39)}
     };
-    // ("eebb_uu_240", 45.86)
-    // ("eebb_uu_zh_240", 39.78)
-    // ("eebb_uu_ww_240", 45.86-39.78)
-    // ("eebb_uu_350", 52.30)
-    // ("eebb_uu_zh_350", 27.06)
-    // ("eebb_uu_ww_350", 52.30-27.06)
-
-    // { 1, std::pair<TString, Double_t> ("eebb_uu_240", 45.86)},
-    // { 2, std::pair<TString, Double_t> ("eebb_uu_zh_240", 39.78)},
-    // { 3, std::pair<TString, Double_t> ("eebb_uu_ww_240", 45.86-39.78)}
-
 
     std::map<TString, Int_t> particletype ={ // Initializes particles {particle type, 1 = on}
     { "muon", 0 },
-    { "electron", 0 },
-    { "jet", 1 }
+    { "electron", 1 },
+    { "jet", 0 }
     };
 
     // Runs over all selected samples and creates histograms of di-particle mass and missing mass

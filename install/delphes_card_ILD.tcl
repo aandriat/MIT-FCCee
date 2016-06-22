@@ -1,5 +1,6 @@
 # based on arXiv:1306.6329
 
+# Tales as an input a pythia card .dat and returns a delphes sample .root
 #######################################
 # Order of execution of various modules
 #######################################

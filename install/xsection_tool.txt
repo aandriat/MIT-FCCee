@@ -1,0 +1,15 @@
+imax 1 number of channels
+jmax * number of background
+kmax * number of nuisance parameters
+--------------------------------------------------
+shapes * * GENERATIONPATH/analysis/process_massHIST.root  $PROCESS $PROCESS_$SYSTEMATIC
+--------------------------------------------------
+Observation -1 
+bin 			1  							1									1
+process 		process_signal_massHIST 	process_background1_massHIST		process_background2_massHIST
+process 		0 							1									2
+rate			-1							-1									-1								# calculate rate from histogram files
+--------------------------------------------------
+lumi    lnN 		1.026 					1.026					1.026
+
+

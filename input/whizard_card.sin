@@ -1,7 +1,0 @@
-process AAA = e1, E1 => (e1, E1, H) 
-wH=4.07e-03
-beams = e1, E1 => isr 
-sqrts = BBB GeV
-n_events = CCC
-sample_format = lhef
-simulate (AAA)

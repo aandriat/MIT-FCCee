@@ -1,5 +1,5 @@
 from CouplingsFitter import *
-
+import os
 f=CouplingsFitter()
 
 
@@ -18,10 +18,11 @@ f.addPOI('inv','inv',0,0.1)
 f.createWidthDeviation()    
 
 
-###Here add the constraints 'name','formula','dependents',mean value ,error 
+###Here add the constraints 'name','formula','dependents',mean value ,error
+# The XXX should be in the place where you want to insert your calculated cross section uncertainty 
 ################################################
 f.addConstraint('Zh','(1+Z)*(1+Z)','Z',1,0.004*0.95)
-f.addConstraint('WWbb','(1+W)*(1+W)*(1+b)*(1+b)/width','W,b,width',1,0.377*0.95)
+f.addConstraint('WWhbb','(1+W)*(1+W)*(1+b)*(1+b)/width','W,b,width',1,XXX*0.95)
 f.addConstraint('Zhbb','(1+Z)*(1+Z)*(1+b)*(1+b)/width','Z,b,width',1,0.002*0.95)
 f.addConstraint('Zhcc','(1+Z)*(1+Z)*(1+c)*(1+c)/width','Z,c,width',1,0.012*0.95)
 f.addConstraint('Zhgg','(1+Z)*(1+Z)*(1+g)*(1+g)/width','Z,g,width',1,0.014*0.95)
@@ -39,3 +40,10 @@ f.fit()
 c,cprime,obj = f.createSummary()
 c.Draw()
 cprime.Draw()
+
+# Saves the two histograms to a pdf
+c.Print("coupling_uncertainty.pdf")
+cprime.Print("higgs_width.pdf")
+
+# Quits python to continue bash script
+os._exit(0)

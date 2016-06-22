@@ -1,22 +1,30 @@
 #!/bin/bash
 
-process=eebb_uu_ww_350 #AAA
+# This bash script takes a whizard card called somename.sin which defines a physics simulation and using whizard, pythia, and delphes creates a simulated delphes sample called somename.root
+# Relies on cmsenv, prior installation of whizard, pythia, and delphes, and properly configured cards somename.sin, main41.cc, and delphes_card_ILD.tcl
+
+folder=GENERATIONPATH #DDD #Do not chage after running setup.sh
+src=SRCPATH #Do not change after running setup.sh
+whizard=WHIZARDPATH #Do not change after running setup.sh
+pythia=PYTHIAPATH #Do not change after running setup.sh
+delphes=DELPHESPATH #Do not change after running setup.sh
+
+process=somename #AAA
 cme=350  #BBB
 numberevents=10000 #CCC
-folder=/afs/cern.ch/work/a/aandriat/public/autogen #DDD #Change this to match where you placed the input folder
-src=/afs/cern.ch/user/a/aandriat/CMSSW_7_6_3_patch2/src #Change this to match your install directory configuration and wherever $src is used throughout the file
-xfilename=output/cross_sections.txt #Defines the place to store cross section info
 
 #Initializes Cross Section. This is not the final value!
 #Do not change
 xsec=1.0 #Actual value will be read from .lhe file and printed to terminal
+xfilename=delphes/cross_sections.txt #Defines the place to store cross section info
+
 
 function back {
     cd $folder
 }
 
 function whizstart {
-    source $src/whizard/build/bin/whizard-setup.sh
+    source $src/$whizard/bin/whizard-setup.sh
 }
 
 back
@@ -27,7 +35,6 @@ echo "This makes directories"
 mkdir -p whizard/gen
 mkdir -p pythia
 mkdir -p delphes
-mkdir -p output
 back
 
 echo "This copies whizard card into the work whizard location"
@@ -65,42 +72,38 @@ echo "This will move generated .lhe file into whizard location"
 mv whizard/gen/$process.lhe whizard
 back
 
+echo "This will remove the junk gen folder"
+rm -r -f whizard/gen
+back
+
+
 echo "This will copy pythia card into pythia"
-cp input/main41.cc $src/pythia/pythia8212/examples
+cp input/main41.cc $src/$pythia/examples
 back
 
 echo "This defines dummy variables in pythia card"
-sed -i 's:AAA:'$process':g'  $src/pythia/pythia8212/examples/main41.cc
-sed -i 's:BBB:'$cme':g'  $src/pythia/pythia8212/examples/main41.cc
-sed -i 's:CCC:'$numberevents':g'  $src/pythia/pythia8212/examples/main41.cc
-sed -i 's:DDD:'$folder':g'  $src/pythia/pythia8212/examples/main41.cc
+sed -i 's:AAA:'$process':g'  $src/$pythia/examples/main41.cc
+sed -i 's:BBB:'$cme':g'  $src/$pythia/examples/main41.cc
+sed -i 's:CCC:'$numberevents':g'  $src/$pythia/examples/main41.cc
+sed -i 's:DDD:'$folder':g'  $src/$pythia/examples/main41.cc
 
 echo "This will cd into pythia"
-cd $src/pythia/pythia8212/examples
+cd $src/$pythia/examples
 make main41
 ./main41
 back
 
 echo "This will copy delphes card into its location"
-cp input/delphes_card_ILD.tcl $src/delphes/cards
+cp input/delphes_card_ILD.tcl $src/$delphes/cards
+back
+
+echo "This will remove the old delphes sample if it exists"
+rm delphes/$process.root
 back
 
 echo "This will cd into delphes and make sample"
-cd $src/delphes
+cd $src/$delphes
 ./DelphesHepMC cards/delphes_card_ILD.tcl $folder/delphes/$process.root $folder/pythia/$process.dat
-back
-
-echo "This deletes the old root file if it exists"
-rm output/$process.root
-back
-
-echo "This copies the delphes sample into folder output"
-cp delphes/$process.root output
-back
-
-echo "This will delete all intermediate directories"
-rm -r -f whizard/gen
-rm -r -f delphes
 back
 
 echo "The calculated cross section for process $process is: $xsec"
