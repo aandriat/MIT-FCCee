@@ -11,7 +11,7 @@
 // WARNING: typically one needs 25 MB/100 events at the LHC.
 // Therefore large event samples may be impractical.
 
-// Modified for sample generation by Alex Andriatis
+// Modified for automated sample generation by Alex Andriatis
 // 17 June 2016
 
 #include "Pythia8/Pythia.h"

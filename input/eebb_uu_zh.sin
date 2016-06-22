@@ -1,9 +1,0 @@
-alias nu = n1:n2:n3
-alias Nu = N1:N2:N3 
-process AAA = e1, E1 => (nu, Nu, H) {$restrictions = "1+2 ~ Z"} 
-wH=4.07e-03
-beams = e1, E1 => isr 
-sqrts = BBB GeV
-n_events = CCC
-sample_format = lhef
-simulate (AAA)
