@@ -8,7 +8,7 @@ Observation -1
 bin 			1  							1									1
 process 		process_signal_massHIST 	process_background1_massHIST		process_background2_massHIST
 process 		0 							1									2
-rate			-1							-1									-1								# calculate rate from histogram files
+rate			-1							-1									-1
 --------------------------------------------------
 lumi    lnN 		1.026 					1.026					1.026
 
