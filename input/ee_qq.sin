@@ -1,0 +1,27 @@
+alias nu = n1:n2:n3
+alias Nu = N1:N2:N3 
+alias q = d:u:s:c:b:t
+alias Q = D:U:S:C:B:T
+alias l = e1:e2:e3
+alias L = E1:E2:E3 
+
+# Physics process to be simulated
+process AAA = e1, E1 => (d, Q) + (u, Q) + (s, Q) + (c, Q) + (t, Q) + (b, Q)
+
+# Initial state radiation
+beams = e1, E1 => isr 
+
+# Higgs Width 
+wH=4.07e-03
+
+# Collision center of mass energy
+sqrts = BBB GeV
+
+# Number of events
+n_events = CCC
+
+# Les Houches event format output
+sample_format = lhef
+
+# Run simulation
+simulate (AAA)

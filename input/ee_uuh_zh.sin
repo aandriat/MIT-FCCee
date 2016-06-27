@@ -1,0 +1,23 @@
+alias nu = n1:n2:n3
+alias Nu = N1:N2:N3 
+
+# Physics process to be simulated
+process AAA = e1, E1 => (nu, Nu, H) {$restrictions = "1+2 ~ Z"}
+
+# Higgs Width 
+wH=4.07e-03
+
+# Initial state radiation
+beams = e1, E1 => isr 
+
+# Collision center of mass energy
+sqrts = BBB GeV
+
+# Number of events
+n_events = CCC
+
+# Les Houches event format output
+sample_format = lhef
+
+# Run simulation
+simulate (AAA)
