@@ -8,6 +8,11 @@
 #
 #Note directory paths (pythia and delphes) must be changed here to match your installations
 #	and setup.
+#cp input line must be changed to the path to your input folder containing your delphes card, pythia card, whizard card,
+#	runjobs.sh, and submitjobs.sh
+#Delphes card must be named delphes_card_ILD.tcl
+#Pythia card must be named main41.cc
+#Whizard card must be named $process.sin as process is defined in submitjobs.sh
 
 echo "runjobs opened"  
 outputDir=$1
