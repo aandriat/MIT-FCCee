@@ -28,7 +28,7 @@
 
 maxEvents=70
 perJob=10
-process=eeWW #AAA
+process=eeZZ #AAA
 cme=240 #BBB
 
 numJobs=maxEvents/perJob
