@@ -1,0 +1,12 @@
+alias q = u:d
+alias Q = U:D
+alias nu = n1:n2:n3
+alias Nu = N1:N2:N3
+process AAA = e1, E1 => (e2, E2, Z) + (e3, E3, Z) + (e1, E1, Z) + (q, Q, Z) + (Z, s, S) + (Z, c, C) + (Z, nu, Nu) + (Z, b, B)
+mH=0   ## setting the higgs mass to zero to exclude the higgs diagrams
+cuts = all M > 50 GeV [q:Q, q:Q] and all M > 50 GeV [s:S,s:S] and all M > 50 GeV [c:C, c:C] and all M > 50 GeV [e2:E2,e2:E2] and all M > 50 GeV [e3:E3,e3:E3] and all M > 50 GeV [e1:E1,e1:E1] and all M > 50 [nu:Nu,nu:Nu] and all M > 50 [b:B,b:B] 
+beams = e1, E1 => isr  # include the isr 
+sqrts = BBB GeV
+n_events = CCC
+sample_format = lhef
+simulate (AAA)
