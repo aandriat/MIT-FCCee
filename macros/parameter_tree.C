@@ -54,7 +54,7 @@ void processsimulation(TString sample, Double_t crosssection, TLorentzVector CME
     ExRootTreeReader *treeReader = new ExRootTreeReader(&chain); // Reads sample from delphes root fiile
 
     //Branches to be read from the collision file
-    std::array<TString, 4> branchnames = {(TString)"Muon",(TString)"Electron",(TString)"Photon",(TString)"Jet"};
+    std::array<TString, 5> branchnames = {(TString)"Muon",(TString)"Electron",(TString)"Photon",(TString)"Jet", (TString)"Particle" };
                                        // (TString)"Tower",(TString)"Track",(TString)"EFlowTrack",(TString)"EFlowPhoton",(TString)"EFlowNeutralHadron"};
     std::map<TString, TClonesArray*> branches;
     for (int i=0; i<(int)branchnames.size(); i++){
@@ -109,11 +109,11 @@ void processsimulation(TString sample, Double_t crosssection, TLorentzVector CME
             skip = parameter_functions(branches["Electron"], electron, "electron", branches, cut, CME, ttree, parameters);
             if (skip == "fill" || skip == "skip") continue;
         }
-        if (particletype["jet"]==1){
-            // Event selection process on Jets
-            skip = parameter_functions(branches["Jet"], jet, "jet", branches, cut, CME, ttree, parameters);
-            if (skip == "fill" || skip == "skip") continue;
-        }
+        // if (particletype["jet"]==1){
+        //     // Event selection process on Jets
+        //     skip = parameter_functions(branches["Jet"], jet, "jet", branches, cut, CME, ttree, parameters);
+        //     if (skip == "fill" || skip == "skip") continue;
+        // }
     }
 
     TFile f(filename, "update");
@@ -133,7 +133,7 @@ void processsimulation(TString sample, Double_t crosssection, TLorentzVector CME
 void parameter_tree(){
     TLorentzVector CME = {0,0,0,240}; // Defines center of mass energy
     Int_t luminosity = 10000; // Defines luminosity
-    TString filename = "ntuples/zhSM_AramDelphesTree.root"; // Filename for to be created Tree collection
+    TString filename = "ntuples/zhSMzzwwTree.root"; // Filename for to be created Tree collection
     TString directory = "/afs/cern.ch/work/j/jcurti/public/parallel_sample_gen/finalized_samples/"; // Directory of stored delphes samples
 
     //This is the list of variables that will be stored as branches in the created TTree
@@ -172,19 +172,33 @@ void parameter_tree(){
         { "phi2" , 0},
         { "charge1" , 0},
         { "charge2" , 0},
+        { "numElectrons" , 0},
+        { "numMuons" , 0},
+        { "numJets" , 0},
+        { "numPhotons" , 0},
+        { "PT1" , 0},
+        { "PT2" , 0},
+        { "genPT1" , 0},
+        { "genPT2" , 0},
+        { "PTresolution1" , 0},
+        { "PTresolution2" , 0},
         { "FSR" , 0},
-        { "num_photons_over10GevPT" , 0}
+        { "flavor" , 0}, //flavor of lepton 0 = electron, 1 = muon
+        { "jetveto2" , 0},
+        { "num_photons_over10GevPT" , 0},
+        { "FSRv2" , 0}
+
     };
 
     std::map<TString, Double_t> samples ={ // Defines which samples to process and their corresponding cross sections {"sample name", cross section}
-    // { "eeZHinv", 20.5510948}, //3.7 mil events
+    { "eeZHinv", 20.5510948}, //3.7 mil events
     // { "eeZH_SM", 20.5555},
-    // { "eeZZ", 2648.680783*.101},// 5.1 mil events
+    { "eeZZ", 2648.680783*.101},// 5.1 mil events
     // { "eeZZnoISR", 2843*.101},
-    // { "eeWW", 12069.71738*.3171} //7.1 mil events
+    { "eeWW", 12069.71738*.3171} //7.1 mil events
     // { "eeWWnoISR", 12600*.3171}
 
-    { "eeZH_SM_AramDelphes", 20.553} //0.8 mil events
+    // { "eeZH_SM_AramDelphes", 20.553} //0.8 mil events
 
     };
 
@@ -206,6 +220,7 @@ void parameter_tree(){
         }
     }
 
+    cout << "FSR count: " << FSR_count << endl;
     double duration;
     duration = (( std::clock() - start ) / (double) CLOCKS_PER_SEC)/60;
     cout<< "Process completed in "<< duration << " minutes" <<'\n';
