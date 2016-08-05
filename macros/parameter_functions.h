@@ -125,7 +125,7 @@ Int_t is_FSR(Double_t ph_eta, Double_t ph_phi, Double_t eta1, Double_t phi1, Dou
 }
 
 string jetVeto(TClonesArray *branchElectron, TClonesArray *branchMuon, TClonesArray *branchJet){
-    //Jet Veto
+    //Jet Veto for Inv study
     Double_t jetDistance = 0;
     Int_t is_lepton = 0; 
     Jet *jet = 0;
@@ -175,8 +175,32 @@ string jetVeto(TClonesArray *branchElectron, TClonesArray *branchMuon, TClonesAr
     return "ok";
 }
 
+Int_t jetVeto2(TClonesArray *branchJet, Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2){
+    //Simplified jet veto. Only for use in my invisible study
+    Jet *jet = 0;
+    Double_t distance1 = 0;
+    Double_t distance2 = 0;
+    for (Int_t iJet = 0; iJet < branchJet->GetEntries(); iJet++){
+        distance1 = 0;
+        distance2 = 0;
+        jet = (Jet*) branchJet->At(iJet);
+        if (jet != 0) {
+            distance1 = DeltaR(eta1, phi1, jet->Eta, jet->Phi);
+            distance2 = DeltaR(eta2, phi2, jet->Eta, jet->Phi);
+            if ( (distance1 < .4) || (distance2 < .4) ){
+                continue;
+            }
+            else if (jet->PT > 20) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 Int_t photon_JetVeto(TClonesArray *branchJet, Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2){
     //Photon to Jet Veto
+    //Doesn't work
     Double_t h_over_e = -9;
     Double_t percentE = -1;
     Jet *jet = 0;
@@ -205,7 +229,7 @@ Int_t photon_JetVeto(TClonesArray *branchJet, Double_t eta1, Double_t phi1, Doub
 }
 
 Int_t photon_JetVeto2(TClonesArray *branchElectron, TClonesArray *branchMuon, TClonesArray *branchJet){
-    //Jet Veto
+    //Testing another method
     Double_t jetDistance = 0;
     Int_t is_lepton = 0; 
     Jet *jet = 0;
@@ -255,6 +279,29 @@ Int_t photon_JetVeto2(TClonesArray *branchElectron, TClonesArray *branchMuon, TC
                 if (percentE > .8) {
                     return 1;
                 }
+            }
+        }
+    }
+    return 0;
+}
+
+Int_t FSRcorrection(TClonesArray *branchPhoton, Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2){
+    //This is a test. Doesn't actually do anything
+    Double_t distance1 = 0;
+    Double_t distance2 = 0;
+    Photon *photon = 0;
+    for (Int_t iPhoton = 0; iPhoton < branchPhoton->GetEntries(); iPhoton++){
+        distance1 = 0;
+        distance2 = 0;
+        photon = (Photon*) branchPhoton->At(iPhoton);
+        if (photon != 0) {
+            distance1 = DeltaR(photon->Eta, photon->Phi, eta1, phi1);
+            distance2 = DeltaR(photon->Eta, photon->Phi, eta2, phi2);
+            if (distance1 < 1) {
+                return 1;
+            }
+            if (distance2 < 1) {
+                return 2;
             }
         }
     }
@@ -393,7 +440,9 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
     Float_t recoilmass = 0, vism = 0, vise = 0, vispt = 0, vispz = 0, ivise = 0, ivispt = 0, ivispz = 0, 
             divism = 0, divise = 0, divispt = 0, divispz = 0, diie = 0, diipt = 0, diipz = 0, acoplanarity = 0,
             labangle = 0, btag = 0, numtracks = 0, numjets = 0, costheta1 = 0, costheta2 = 0, eta1 = 0, 
-            eta2 = 0, phi1 = 0, phi2 = 0, jetveto = 0, charge1 = 0, charge2 = 0, photon_jet_veto = 0;
+            eta2 = 0, phi1 = 0, phi2 = 0, jetveto = 0, charge1 = 0, charge2 = 0, PT1 = 0, PT2 = 0, 
+            genPT1 = 0, genPT2 = 0, PTresolution1 = 0, PTresolution2 = 0, flavor = -1, FSRv2 = 0,
+            photon_jet_veto = 0, jetveto2 = 0, numElectrons = 0, numMuons = 0, numJets = 0, numPhotons = 0;
 
     // Leading Particle Selection
     if (parttype == "electron" || parttype == "muon") {chosen = select_2_leading(branch, particle);}
@@ -421,16 +470,36 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
     particle1P4 = particleSel1->P4();
     particle2P4 = particleSel2->P4();
 
+    if (parttype == "electron"){
+        flavor = 0;
+    }
+    else if (parttype == "muon"){
+        flavor = 1;
+    }
+
     eta1 = particleSel1->Eta;
     phi1 = particleSel1->Phi;
     eta2 = particleSel2->Eta;
     phi2 = particleSel2->Phi;
     charge1 = particleSel1->Charge;
     charge2 = particleSel2->Charge;
+    PT1 = particleSel1->PT;
+    PT2 = particleSel2->PT;
+
+    genPT1 = ((GenParticle *) particleSel1->Particle.GetObject())->PT;
+    genPT2 = ((GenParticle *) particleSel2->Particle.GetObject())->PT;
+
+    PTresolution1 = TMath::Abs(PT1 - genPT1)/genPT1;
+    PTresolution2 = TMath::Abs(PT2 - genPT2)/genPT2;
+
+    numElectrons = branches["Electron"]->GetEntries();
+    numMuons = branches["Muon"]->GetEntries();
+    numJets = branches["Jet"]->GetEntries();
+    numPhotons = branches["Photon"]->GetEntries();
 
     //Gets number of photons with at least 10 GeV PT. First int is number and Second is index which is relevant
     //only if number = 1
-    photon_results = num_photons_greaterPTthan(branches["Photon"], 10);
+    photon_results = num_photons_greaterPTthan(branches["Photon"], 1);
     if (photon_results.first == 1){ //If there is a candidate photon for FSR
         //Checks if FSR. Also saves photonP4
         photonSel = (Photon*) branches["Photon"]->At(photon_results.second);
@@ -439,11 +508,11 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
         photonP4 = photonSel->P4();
         //FSR Momentum Correction
         if (FSR == 1) {
-            // FSR_count++;
+            FSR_count++;
             particle1P4 += photonP4;
         }
         else if (FSR == 2) {
-            // FSR_count++;
+            FSR_count++;
             particle2P4 += photonP4;   
         }
     }
@@ -486,6 +555,12 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
 
     if (jetVeto(branches["Electron"], branches["Muon"], branches["Jet"]) == "skip") { jetveto = 1; }
     (*parameters)["jetveto"] = jetveto;
+
+    jetveto2 = jetVeto2(branches["Jet"], eta1, phi1, eta2, phi2);
+    (*parameters)["jetveto2"] = jetveto2;
+
+    FSRv2 = FSRcorrection(branches["Photon"], eta1, phi1, eta2, phi2);
+    (*parameters)["FSRv2"] = FSRv2;
 
     photon_jet_veto = photon_JetVeto2(branches["Electron"], branches["Muon"], branches["Jet"]);
     (*parameters)["photonjetveto"] = photon_jet_veto;
@@ -537,7 +612,21 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
     (*parameters)["phi1"] = phi1;
     (*parameters)["phi2"] = phi2;  
     (*parameters)["charge1"] = charge1;
-    (*parameters)["charge2"] = charge2; 
+    (*parameters)["charge2"] = charge2;
+    (*parameters)["numElectrons"] = numElectrons;
+    (*parameters)["numMuons"] = numMuons;
+    (*parameters)["numJets"] = numJets;
+    (*parameters)["numPhotons"] = numPhotons;
+   
+
+    (*parameters)["PT1"] = PT1;
+    (*parameters)["PT2"] = PT2;
+    (*parameters)["genPT1"] = genPT1;
+    (*parameters)["genPT2"] = genPT2;
+    (*parameters)["PTresolution1"] = PTresolution1;
+    (*parameters)["PTresolution2"] = PTresolution2;    
+
+    (*parameters)["flavor"] = flavor; 
     (*parameters)["FSR"] = FSR; 
     (*parameters)["num_photons_over10GevPT"] = photon_results.first; 
 
