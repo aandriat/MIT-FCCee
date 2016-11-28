@@ -1,0 +1,21 @@
+imax 2 number of channels
+jmax * number of background
+kmax * number of nuisance parameters
+--------------------------------------------------
+shapes * * GENERATIONPATH/analysis/ee_350.root  $PROCESS $PROCESS_$SYSTEMATIC
+--------------------------------------------------
+bin 			recoil	 mass
+observation 	-1 		-1
+--------------------------------------------------
+Observation -1 -1
+bin 			recoil						recoil						recoil						recoil						mass						mass						mass					mass	
+process 		ee_uuh_ww_recoilmassHIST 	ee_uuh_zh_recoilmassHIST	ee_uubb_recoilmassHIST		ee_uucc_recoilmassHIST 		ee_uuh_ww_massHIST  		ee_uuh_zh_massHIST 			ee_uubb_massHIST 	 	ee_uucc_massHIST	  	
+process 		0 							1							2						 	3						 	0							1							2						3		
+rate			-1 							-1 							-1  						-1  						-1  						-1  						-1  					-1	
+--------------------------------------------------
+lumir 	lnN 	1.001 						1.001 						1.001 						1.001						-							-							-						-
+lumim	lnN 	-							-							-							-							1.001						1.001						1.001					1.001
+signorm	lnN 	1.001					 	-						 	- 							-							1.001						-							-						-		
+bbnorm	lnN 	- 							- 							1.001 						-							-							-							1.001					-
+ccnorm	lnN 	- 							-							-							1.001						-							-							-						1.001
+zhnorm 	lnU		-							1.40 						-							-	 						-							1.40 						-						-	
