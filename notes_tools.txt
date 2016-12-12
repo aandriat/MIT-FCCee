@@ -1,0 +1,99 @@
+A collection of notes on how to use the various programs and tools used in an analysis.
+Hope this is helpful, and please feel free to add any tips or info you find useful. -Joseph
+
+Manual Sample Generation:
+  1. Whizard 
+      a) Set up parameters in whizard process card (.sin file)
+      b) run by using "whizard process.sin"
+      c) The important output is the .lhe file as this is the input for the
+        pythia step
+      d) Calculated cross section is displayed here and is saved in the .lhe file (also displayed in pythia step)
+  2. Pythia 
+      a) set pythia data card parameters to your liking
+        i) Important to define the input file (including path) and the number of 
+          events properly
+        ii) Number of events stated in the pythia card must match the actual events produced in the whizard step
+      b) to run do: 
+        make main41
+        ./main41
+      c) Output is hepmc events (.dat file)
+  3. Delphes (Detector Simulator)
+      a) Can set detector parameter by changing delphes card
+      b) to run do:
+        ./DelphesHepMC cards/delphes_card_ILD.tcl delphes.root hepmc.root
+        ./<path to delphes card> <output>.root <input>.dat
+
+  Alternatively, one can use madgraph instead of the whizard, pythia combination. Madgraph does not simulate initial state radiation
+  effects as well as whizard, but is more user friendly. Madgraph can display the Feynman diagrams of the processes in the sample
+  which can be a helpful check.
+  4. Madgraph
+      cd /madgraph/madfadgfsfds/bin
+      ./mg5_aMC
+      generate process e.g. e+ e- > z h
+      add process ...
+      display diagrams
+      output *name*
+      launch
+      change run card beam energy and number of events
+      change param card if needed
+      enter
+    
+Parallel sample generation:
+The sample generation process has been automated with details and scripts provided in the parallel_sample_gen section
+of this GitHub. 
+  5. Parallel sample gen
+      bash submitjobs.sh
+      merge individual root samples with:
+        hadd target.root *.root
+
+Analysis:
+6. Combine
+    Once you have made your sample and processed the events to a histogram, Combine can be used to statistically analyze uncertainties
+    and perform measurements.
+
+    The options  -t and -1 in the following commands are needed because we do not have real data
+    Combine just needs the root file containing histogram and the datacard
+
+    To find the significance of the signal:
+    combine -M ProfileLikelihood --significance Higgs_inv.txt -t -1 --expectSignal=1
+
+    To find an upper limit:
+    combine -M Asymptotic --run blind Higgs_inv.txt 
+
+    Uncertainty on cross section:
+    combine -M MaxLikelihoodFit --robustFit 1 --expectSignal=1 -t -1 ../Higgs_inv.txt
+
+    If Combine fails to output a result properly, you can try adding the option --rMax X (change X to a reasonable number)
+    to change the starting value of the fit so that it is more likely to converge. For example:
+    combine -M MaxLikelihoodFit --robustFit 1 --expectSignal=1 -t -1 --rMax 3 ../Higgs_inv.txt
+
+    For the maximum likelihood fit, it gives you the expected uncertainty on the cross section:
+    Best fit r: 1  -1/+2.07217  (68% CL)  # r is the value of interest (measured cross section over the expected).
+    The option -t -1 ->  throws a pseudo-data according to the expectation. 
+    One warning, the tool expects to find 'data_obs' histogram in the input root file. 
+    you can just copy the signal histogram and rename the copy to 'data_obs' to bypass the requirement. 
+    The MaximumLikelihood fit command above does not use the observation. 
+
+7. Coupling Code (in CMSSW_X_Y_Z/src/tlep-couplings)
+    Follow the instructions in the 'README.md'.
+    To run use:
+    python -i runTLEP_250_350_Standalone_Floating.py 
+    In runTLEP_250_350_Standalone_Floating.py you can find the list of the constraints. 
+    For more details you can take a look in this paper:
+    https://arxiv.org/abs/1308.6176
+
+8. Stat shape uncertainty tool
+    adds bin by bin uncertainties both up and down if a threshold level of uncertainty is met
+      default threshold is 5%
+    in higgsAnalysis/higgstoTauTau/scripts
+    run with ./add_stat_shapes.py --filter *name_of_hist_toShape* input.root output.root
+      -h for help
+      --filter *name_of_hist_toShape*
+
+9. Github
+    To push something:
+    git add -A
+    git commit -m "description"
+    git push origin master
+    git status
+ 
