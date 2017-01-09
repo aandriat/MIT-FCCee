@@ -1,0 +1,11 @@
+Jet Algorithm Notes
+
+Inclusive kt algorithm does not include dcut thus stores all particles as jets.
+Possibility to use inclusive kt with only 2 jets for ee search
+
+Can cluster exclusively but instead of dcut use exact number of jets
+
+vector <PseudoJet> exclusive_jets (const int & njets) const
+
+On page 14 
+double exclusive_ymerge (int njets);
