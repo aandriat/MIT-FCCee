@@ -1,0 +1,24 @@
+imax 1 number of channels
+jmax * number of background
+kmax * number of nuisance parameters
+--------------------------------------------------
+shapes * * GENERATIONPATH/analysis/ee_350.root  $PROCESS $PROCESS_$SYSTEMATIC
+--------------------------------------------------
+Observation -1 
+bin 			1	1	1	1	
+process 		ee_uuh_ww_recoilmassHIST 	ee_uuh_zh_recoilmassHIST	ee_uubb_recoilmassHIST		ee_uucc_recoilmassHIST	 	 	 	
+process 		0 	1	2 	3 			
+rate			-1 	-1 	-1 	-1 	
+--------------------------------------------------
+lumi    lnN 	1.026 	1.026 	1.026 	1.026 		
+syst0	lnN 	1.01 	- 	- 	- 
+syst1	lnN 	- 	1.01 	-	- 		
+syst2	lnN 	- 	- 	1.01 	-		
+syst3	lnN 	- 	-	-	1.01		
+syst4 	lnN 	- 	- 	- 	- 		
+syst5	lnN 	- 	-	-	-		
+syst6	lnN 	-	-	-	-		
+syst7	lnN	-	-	-	-		
+syst8	lnN	-	-	-	-		
+syst9	lnN	-	-	-	-		
+
