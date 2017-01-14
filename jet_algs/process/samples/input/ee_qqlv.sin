@@ -1,0 +1,29 @@
+alias nu = n1:n2:n3
+alias Nu = N1:N2:N3
+alias q = d:u:s:c:b:t
+alias Q = D:U:S:C:B:T
+alias l = e1:e2:e3
+alias L = E1:E2:E3
+
+# Physics process to be simulated
+process AAA = e1, E1 => (u, D, e1, N1) + (u, D, e2, N2) + (u, D, e3, N3) + (U, d, E1, n1) + (U, d, E2, n2) + (U, d, E3, n3) + (c, S, e1, N1) + (c, S, e2, N2) + (c, S, e3, N3) + (C, s, E1, n1) + (C, s, E2, n2) + (C, s, E3, n3)
+
+mH=0
+
+# Generation Cuts
+cuts = all M > 90 GeV [q:Q, q:Q] and all M < 160 GeV [q:Q, q:Q]
+
+# Initial state radiation
+beams = e1, E1 => isr 
+
+# Collision center of mass energy
+sqrts = BBB GeV
+
+# Number of events
+n_events = CCC
+
+# Les Houches event format output
+sample_format = lhef
+
+# Run simulation
+simulate (AAA)

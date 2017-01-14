@@ -1,0 +1,26 @@
+alias nu = n1:n2:n3
+alias Nu = N1:N2:N3 
+alias q = d:u:s:c:b:t
+alias Q = D:U:S:C:B:T
+alias l = e1:e2:e3
+alias L = E1:E2:E3 
+
+# Physics process to be simulated
+process AAA = e1, E1 =>  (G,G,t,T) + (u,U,t,T) + (d,D,t,T) + (s,S,t,T) + (c,C,t,T) + (b,T,E1,n1) + (b, T, E2, n2) + (b,T,E3,n3) + (B,t, e1, N1)+ (B, t, e2, E2) + (B,t,e3,N3) + (t,T, e1, E1) + (t, T, e2, E2) + (t,T, e3, E3) + (t,T,A) + (t,T) + (t,T, n1, N1) + (t, T, n2, N2) + (t,T, n3, N3) 
+
+mH=0
+
+# Initial state radiation
+beams = e1, E1 => isr 
+
+# Collision center of mass energy
+sqrts = BBB GeV
+
+# Number of events
+n_events = CCC
+
+# Les Houches event format output
+sample_format = lhef
+
+# Run simulation
+simulate (AAA)
