@@ -401,12 +401,12 @@ module FastJetFinder GenJetFinder {
 
   set OutputArray jets
 
-  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 4
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, 7 WTA, 8 Njettiness, 9 ee_kt, 10 XCone
+  set JetAlgorithm 6
   set ParameterR 0.5
 
   set JetPTMin 5.0
-  set Inclusive 2
+  set Inclusive 1
   set NumJets 2
 }
 
@@ -432,12 +432,12 @@ module FastJetFinder FastJetFinder {
 
   set OutputArray jets
 
-  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 4
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, 7 WTA, 8 Njettiness, 9 ee_kt, 10	XCone
+  set JetAlgorithm 6
   set ParameterR 0.5
 
   set JetPTMin 5.0
-  set Inclusive 2
+  set Inclusive 1
   set NumJets 2
 }
 

@@ -9,3 +9,11 @@ vector <PseudoJet> exclusive_jets (const int & njets) const
 
 On page 14 
 double exclusive_ymerge (int njets);
+
+
+xcone is a purposefully designed njettiness algorithm 
+
+
+Anti_kt seems to fail with exclusive clustering ... strange
+
+

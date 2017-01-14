@@ -116,6 +116,8 @@ void FastJetFinder::Init()
   fOverlapThreshold = GetDouble("OverlapThreshold", 0.75);
 
   fJetPTMin = GetDouble("JetPTMin", 10.0);
+  fInclusiveness = GetInt("Inclusive", 1);
+  fNumJets = GetInt("NumJets", 2);
 
   //-- N(sub)jettiness parameters --
 
@@ -234,6 +236,9 @@ void FastJetFinder::Init()
     case 8:
       fNjettinessPlugin = new NjettinessPlugin(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
       fDefinition = new JetDefinition(fNjettinessPlugin);
+      break;
+    case 9:
+      fDefinition = new JetDefinition(ee_kt_algorithm);
       break;
   }
 
@@ -356,7 +361,17 @@ void FastJetFinder::Process()
   }
 
   outputList.clear();
-  outputList = sorted_by_pt(sequence->exclusive_jets(const int & njets = 2));
+  switch(fInclusiveness)
+  {
+    default:
+      case 1:
+        outputList = sorted_by_pt(sequence->inclusive_jets(fJetPTMin));
+        break;
+      case 2:
+        outputList = sorted_by_pt(sequence->exclusive_jets_up_to(fNumJets));
+   }
+
+//  outputList = sorted_by_pt(sequence->exclusive_jets_up_to(2));
 
 
   // loop over all jets and export them

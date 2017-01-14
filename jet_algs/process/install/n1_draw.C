@@ -1,0 +1,297 @@
+// E+E- Delphes Sample Drawing for ee->bbvv final state
+// Alexander Andriatis
+// 17 June 2016
+
+// Takes a .root collection of histograms created by hist_process.C and saves a pretty histogram as .pdf
+
+#if !defined(__CINT__) || defined(__MAKECINT__)
+
+#include <TROOT.h>              //  -
+#include <TSystem.h>            //   |
+#include <TFile.h>              //   |
+#include <TTree.h>              //   |
+#include <TClonesArray.h>       //   |
+#include <TChain.h>             //   |
+#include <TCanvas.h>            //   |
+#include <TStyle.h>             //   |
+#include <TLegend.h>            //    -  Include tools for root in general  
+#include <TH1.h>                //   |
+#include <TF1.h>   
+#include <TH2.h>                //   |
+#include <iostream>             //   |
+#include <fstream>              //   |
+#include <cmath>                //   |
+#include <fstream>              //   |
+#include <TString.h>            //   |
+#include <TLorentzVector.h>     //   |
+#include "TMath.h"              //  -
+#include <TLatex.h> 
+#include <TPaveText.h>
+
+#endif
+
+using namespace TMath;
+using namespace std;
+
+//Main Function
+void n1_draw(){
+
+    TString file = "ee_350_cutSSS";
+    TString root = ".root";
+    TString name, histtype, filename;
+
+    std::map<TString, Int_t > histnames ={ // Defines which samples to process}
+        { "ee_uuh_ww", 0},
+        { "ee_uuh_zh", 0},
+        { "ee_uubb", 1},
+        { "ee_uucc", 1},
+        { "ee_qq", 0},
+        { "ee_qqa", 0},
+        { "ee_qqll", 0},
+        { "ee_qqlv", 0},
+        { "ee_uuqq", 0},
+        { "ee_qqqq", 0},
+        { "ee_qqtt", 0},
+        { "ee_uuh", 1},
+        { "subtracted", 0},
+        { "data_obs", 0}
+    };
+
+    std::map<Int_t, TString> parameters ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
+        { 1, "vism"},
+        { 2, "vispt"},
+        { 3, "vispz"},
+        { 4, "acoplanarity"},
+        { 5, "labangle"},
+        { 6, "numjets"},
+        { 7, "numtracks"},
+        { 8, "btag"},
+        { 9, "numleptons"},
+        { 10, "costheta1"},
+        { 11, "costheta2"}
+    };
+
+    std::map<Int_t, TString> histtypes ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
+        { 1, "_recoilmassHIST"},
+        { 2, "_parameterHIST"},
+        { 3, "_recoilmassHIST_all"},
+        { 4, "_parameterHIST_all"}
+    };
+
+    std::map<TString, TString > titles ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
+        { "_recoilmassHIST", "Reconstructed Mass of Di-Jet System @ #sqrt{s} = 350 GeV, n-1 cut"},
+        { "_parameterHIST" , " @ #sqrt{s} = 350 GeV, n-1 cut"},
+        { "_recoilmassHIST_all", "Reconstructed Mass of Di-Jet System @ #sqrt{s} = 350 GeV, all cuts"},
+        { "_parameterHIST_all" , " @ #sqrt{s} = 350 GeV, all cuts"}
+    };
+
+    std::map<TString, TString > xtitles ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
+        { "_recoilmassHIST", "Reconstructed Mass (GeV)"},
+        { "_parameterHIST", " "},
+        { "_recoilmassHIST_all", "Reconstructed Mass (GeV)"},
+        { "_parameterHIST_all", " "}
+    };
+
+    std::map<TString, TString > ytitles ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
+        { "_recoilmassHIST", "Count"},
+        { "_parameterHIST", "Count"},
+        { "_recoilmassHIST_all", "Count"},
+        { "_parameterHIST_all", "Count"}
+    };
+
+    
+    // Plots the signal and background di-jet mass and missing mass
+    TCanvas *can = new TCanvas(file, file, 1280, 720);
+    can->Divide(2, 2);
+    
+
+    for (Int_t counter=1; counter<5; counter++){
+        histtype = histtypes[counter];
+        can->cd(counter);
+
+        filename = file+root;
+        TFile *f = new TFile(filename); // Specifies the root files which contain the generated histograms
+
+        std::map<TString, TH1D*> histograms;
+        std::map<TString, Int_t>::iterator names;
+        for ( names = histnames.begin(); names != histnames.end(); names++){
+            if (names->second == 1){
+                name = names->first + histtype;
+                histograms.insert ( std::pair<TString, TH1D*> (names->first, (TH1D*)f->Get(name)));
+            }
+        }
+
+        if (histnames["subtracted"]==2){
+            histograms.insert ( std::pair<TString, TH1D*> ("ee_uuh_ww", new TH1D("subtracted", "subtracted", 350/2, 0, 350)));
+            *((histograms)["ee_uuh_ww"]) = *((histograms)["ee_uuh"]) - *((histograms)["ee_uuh_zh"]);
+            TString subname = "ee_uuh_ww"+histtype;
+            (histograms)["ee_uuh_ww"]->SetName(subname);
+        }
+
+        
+        Double_t largest=0;
+        std::map<TString, TH1D*>::iterator hists;
+        for ( hists = histograms.begin(); hists != histograms.end(); hists++){
+            Double_t newlargest = hists->second->GetMaximum();
+            if (newlargest > largest){
+                largest = newlargest;
+            }
+        }
+        largest = 1.1*largest;
+        
+        std::map<TString, TH1D*>::iterator histsit;
+        for (histsit = histograms.begin(); histsit != histograms.end(); histsit++){
+            name = histsit->first;
+            if (histtype == "_recoilmassHIST" || histtype == "_recoilmassHIST_all"){
+                (histograms)[name]->SetTitle(titles[histtype]);
+                (histograms)[name]->GetXaxis()->SetTitle(xtitles[histtype]);
+            }
+            else {
+                TString title = parameters[SSS] + titles[histtype];
+                TString xtitle = parameters[SSS] + xtitles[histtype];
+                (histograms)[name]->SetTitle(title);
+                (histograms)[name]->GetXaxis()->SetTitle(xtitle);
+
+            }
+            (histograms)[name]->GetYaxis()->SetTitle(ytitles[histtype]);
+            (histograms)[name]->SetMinimum(0);
+            (histograms)[name]->SetMaximum(largest);
+        }
+
+        name = "ee_uuh_ww";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kRed);
+        (histograms)[name]->SetFillStyle(1001);
+        (histograms)[name]->SetFillColor(kRed);
+        (histograms)[name]->SetStats(kTRUE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_uuh_zh";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kMagenta);
+        (histograms)[name]->SetFillStyle(3004);
+        (histograms)[name]->SetFillColor(kMagenta);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_uuh";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kMagenta);
+        (histograms)[name]->SetFillStyle(3004);
+        (histograms)[name]->SetFillColor(kMagenta);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_uubb";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kBlue);
+        (histograms)[name]->SetFillStyle(3005);
+        (histograms)[name]->SetFillColor(kBlue);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_uucc";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kCyan);
+        (histograms)[name]->SetFillStyle(3006);
+        (histograms)[name]->SetFillColor(kCyan);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_qq";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kGreen);
+        (histograms)[name]->SetFillStyle(3007);
+        (histograms)[name]->SetFillColor(kGreen);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_qqa";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kYellow);
+        (histograms)[name]->SetFillStyle(3008);
+        (histograms)[name]->SetFillColor(kYellow);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_qqll";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kGreen+1);
+        (histograms)[name]->SetFillStyle(3009);
+        (histograms)[name]->SetFillColor(kGreen+1);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_qqlv";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kYellow+1);
+        (histograms)[name]->SetFillStyle(3010);
+        (histograms)[name]->SetFillColor(kYellow+1);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_uuqq";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kGreen+2);
+        (histograms)[name]->SetFillStyle(3011);
+        (histograms)[name]->SetFillColor(kGreen+2);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_qqqq";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kYellow+2);
+        (histograms)[name]->SetFillStyle(3012);
+        (histograms)[name]->SetFillColor(kYellow+2);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_qqtt";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kYellow+2);
+        (histograms)[name]->SetFillStyle(3012);
+        (histograms)[name]->SetFillColor(kYellow+2);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+        
+
+        TLegend* leg = new TLegend(0.13,0.69,0.25,0.89);
+        std::map<TString, TH1D*>::iterator histdrawer;
+        for (histdrawer = histograms.begin(); histdrawer != histograms.end(); histdrawer++){
+            name = histdrawer->first;
+            //(histograms)[name]->Draw("hist same");
+            leg->AddEntry((histograms)[name],name,"f");
+        }
+        leg->Draw();
+        
+
+        // TFile *g = new TFile(filename, "update"); // Specifies the root files which contain the generated histograms
+        //     if (histnames["data_obs"]==2){
+        //         histograms.insert ( std::pair<TString, TH1D*> ("data_obs", new TH1D("data_obs", "data_obs", 350/2, 0, 350)));
+        //         *((histograms)["data_obs"]) = *((histograms)["ee_uuh_ww"]);
+        //         (histograms)["data_obs"]->SetName("data_obs");
+        //         (histograms)["data_obs"]->Write();
+        //     }
+        //     if (histnames["subtracted"]==2){
+        //         (histograms)["subtracted"]->Write();
+        //     }
+        // g->Close();
+
+    }
+        // Saves as PDF
+    can->Print("",".pdf");
+
+}
+
