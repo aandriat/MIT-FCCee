@@ -10,23 +10,27 @@ function back {
 }
 back
 
-echo "Processing Delphes Samples into Parameter Trees"
-rm -rf trees
-mkdir -p trees
+echo "Cutting Trees"
+echo "This makes treecutter directory"
+rm -rf treecutter
+mkdir -p treecutter
 back
 
 echo "This copies necessary files"
-cp input/rootlogon.C trees/
-cp input/parameter_functions.h trees/
-cp input/parameter_tree.C trees/
+cp input/rootlogon.C treecutter/
+cp input/treecutter_tree.C treecutter/
 back
 
-cd trees
+cd treecutter
 
 echo "Starting parameter_tree"
-root -l parameter_tree.C+ -q
+root -l treecutter_tree.C+ -q
 back
 
 echo "Done"
+echo
+echo
+echo
+
 
 

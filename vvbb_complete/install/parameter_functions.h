@@ -259,6 +259,41 @@ std::pair<Int_t, Int_t> select_2_higgs(TClonesArray *branch, T (*examplePart), T
 }
 
 template<typename T>
+std::array<Float_t, 4> jetresolution(TClonesArray *branch, T (*examplePart), TLorentzVector jet1P4, TLorentzVector jet2P4){
+    TLorentzVector genjet1P4, genjet2P4;
+     T *part = 0, *part2 = 0, *partSel1 = 0, *partSel2 = 0;
+    TLorentzVector part1P4, part2P4;
+    Double_t newdeltar, olddeltar, deltar1, deltar2, jet1res, jet2res, genjet1E, genjet2E;
+    olddeltar = 4;
+
+    for (Int_t iPart = 0; iPart < branch->GetEntries(); iPart++){
+        part = (T*) branch->At(iPart); 
+        for (Int_t iPart2 = iPart+1; iPart2 < branch->GetEntries(); iPart2++){
+            part2 = (T*) branch->At(iPart2);
+            part1P4 = part->P4();
+            part2P4 = part2->P4();
+            deltar1 = jet1P4.DeltaR(part1P4);
+            deltar2 = jet2P4.DeltaR(part2P4);
+            newdeltar = deltar1 + deltar2;
+            if(newdeltar < olddeltar){
+                partSel1=part;
+                part1P4 = part->P4();
+                partSel2=part2;
+                part2P4 = part2->P4();
+                olddeltar = newdeltar;
+            }
+        }
+    }
+    genjet1E = part1P4.E();
+    genjet2E = part2P4.E();
+    jet1res = jet1P4.E()/genjet1E;
+    jet2res = jet2P4.E()/genjet2E;
+    std::array <Float_t, 4>  jetres = {(Float_t) genjet1E, (Float_t) genjet2E, (Float_t) jet1res, (Float_t) jet2res}; 
+
+    return jetres;
+}
+
+template<typename T>
 TString parameter_functions(TClonesArray *branch, T (*examplePart), TString parttype, std::map<TString, TClonesArray*> branches, std::map<TString, Int_t> cut, TLorentzVector CME, TTree *ttree, std::map<TString, Float_t> *parameters){
     //If any selection cut is not met "skip" is returned
     //If the event meets the requirements and the hist was filled successfully
@@ -277,7 +312,7 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
     chosen = std::make_pair (-1,-1);
 
     // Defines Tree Branch Variables
-    Float_t recoilmass = 0, vism = 0, vise = 0, vispt = 0, vispz = 0, ivise = 0, ivispt = 0, ivispz = 0, divism = 0, divise = 0, divispt = 0, divispz = 0, diie = 0, diipt = 0, diipz = 0, acoplanarity = 0, labangle = 0, btag = 0, numtracks = 0, numjets = 0, costheta1=0, costheta2=0, numleptons=0;
+    Float_t recoilmass = 0, vism = 0, vise = 0, vispt = 0, vispz = 0, ivise = 0, ivism = 0, ivispt = 0, ivispz = 0, divism = 0, divise = 0, divispt = 0, divispz = 0, diie = 0, diipt = 0, diipz = 0, acoplanarity = 0, labangle = 0, btag = 0, numtracks = 0, numjets = 0, costheta1=0, costheta2=0, numleptons=0, jet1res=0, jet2res=0, genjet1E=0, genjet2E=0;
  
     // Leading Particle Selection
     if (parttype == "electron" || parttype == "muon") {chosen = select_2_leading(branch, particle);}
@@ -332,6 +367,9 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
     ivise = diffallP4.E();
     (*parameters)["ivise"] = ivise;
 
+    ivism = diffallP4.M();
+    (*parameters)["ivism"] = ivism;
+
     ivispt = diffallP4.Pt();
     (*parameters)["ivispt"] = ivispt;
 
@@ -372,6 +410,12 @@ TString parameter_functions(TClonesArray *branch, T (*examplePart), TString part
         
         numtracks = jetSel1->NCharged + jetSel2->NCharged;
         (*parameters)["numtracks"] = numtracks;
+
+        std::array<Float_t, 4> resolutionparams = jetresolution(branches["GenJet"], particle, particle1P4, particle2P4);
+        (*parameters)["jet1res"] = resolutionparams[2];
+        (*parameters)["jet2res"] = resolutionparams[3];
+        (*parameters)["genjet1E"] = resolutionparams[0];
+        (*parameters)["genjet2E"] = resolutionparams[1];
     }
 
     numjets = branch->GetEntries();

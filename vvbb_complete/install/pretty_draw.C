@@ -77,8 +77,10 @@ void pretty_draw(){
 
         TH1D *ee_uuh_recoilmassHIST = (TH1D*)f->Get("ee_uuh_recoilmassHIST");
         TH1D *ee_uuh_zh_recoilmassHIST = (TH1D*)f->Get("ee_uuh_zh_recoilmassHIST");
-        TH1D *ee_uubb_recoilmassHIST = (TH1D*)f->Get("ee_uubb_recoilmassHIST");
-        TH1D *ee_uucc_recoilmassHIST = (TH1D*)f->Get("ee_uucc_recoilmassHIST");
+        TH1D *ee_qq_recoilmassHIST = (TH1D*)f->Get("ee_qq_recoilmassHIST");
+        TH1D *ee_tt_recoilmassHIST = (TH1D*)f->Get("ee_tt_recoilmassHIST");
+        TH1D *ee_ww_recoilmassHIST = (TH1D*)f->Get("ee_ww_recoilmassHIST");
+        TH1D *ee_zz_recoilmassHIST = (TH1D*)f->Get("ee_zz_recoilmassHIST");
 
         TH1D *ee_uuh_ww_recoilmassHIST = new TH1D("subtracted", "subtracted", 350/2, 0, 350);
         *ee_uuh_ww_recoilmassHIST = *ee_uuh_recoilmassHIST - *ee_uuh_zh_recoilmassHIST;
@@ -86,8 +88,10 @@ void pretty_draw(){
 
         InitHist(ee_uuh_ww_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(248,41,104), 1001);
         InitHist(ee_uuh_zh_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(248,206,104), 1001);
-        InitHist(ee_uubb_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,206), 1001);
-        InitHist(ee_uucc_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,78), 1001);
+        InitHist(ee_qq_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,206), 1001);
+        InitHist(ee_tt_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,78), 1001);
+        InitHist(ee_ww_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,206), 1001);
+        InitHist(ee_zz_recoilmassHIST, "Missing Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,78), 1001);
 
         ee_uuh_ww_recoilmassHIST->SetMinimum(0);
         ee_uuh_ww_recoilmassHIST->SetMaximum(ee_uuh_ww_recoilmassHIST->GetMaximum()*1.1);
@@ -95,8 +99,10 @@ void pretty_draw(){
 
         ee_uuh_ww_recoilmassHIST->Draw("hist same");
         ee_uuh_zh_recoilmassHIST->Draw("hist same");
-        ee_uubb_recoilmassHIST->Draw("hist same");
-        ee_uucc_recoilmassHIST->Draw("hist same");
+        ee_qq_recoilmassHIST->Draw("hist same");
+        ee_tt_recoilmassHIST->Draw("hist same");
+        ee_ww_recoilmassHIST->Draw("hist same");
+        ee_zz_recoilmassHIST->Draw("hist same");
 
         TLegend* leg;
           leg = new TLegend(0.25, 0.70,0.95, 0.85);
@@ -105,8 +111,10 @@ void pretty_draw(){
           leg->SetFillColor(kWhite);
           leg->AddEntry( ee_uuh_ww_recoilmassHIST , "WW",  "F" );
           leg->AddEntry( ee_uuh_zh_recoilmassHIST , "ZH",  "F" );
-          leg->AddEntry( ee_uubb_recoilmassHIST , "b#bar{b}",  "F" );
-          leg->AddEntry( ee_uucc_recoilmassHIST , "c#bar{c}",  "F" );
+          leg->AddEntry( ee_qq_recoilmassHIST , "q#bar{q}",  "F" );
+          leg->AddEntry( ee_tt_recoilmassHIST , "t#bar{t}",  "F" );
+          leg->AddEntry( ee_ww_recoilmassHIST , "W+W-",  "F" );
+          leg->AddEntry( ee_zz_recoilmassHIST , "ZZ",  "F" );
           leg->Draw("same");
      
         TPaveText* pt = new TPaveText(0.3,0.55,0.4, 0.65, "tlbrNDC"); // NDC sets coords// relative to pad dimensions
@@ -129,8 +137,10 @@ void pretty_draw(){
 
         TH1D *ee_uuh_massHIST = (TH1D*)f->Get("ee_uuh_massHIST");
         TH1D *ee_uuh_zh_massHIST = (TH1D*)f->Get("ee_uuh_zh_massHIST");
-        TH1D *ee_uubb_massHIST = (TH1D*)f->Get("ee_uubb_massHIST");
-        TH1D *ee_uucc_massHIST = (TH1D*)f->Get("ee_uucc_massHIST");
+        TH1D *ee_qq_massHIST = (TH1D*)f->Get("ee_qq_massHIST");
+        TH1D *ee_tt_massHIST = (TH1D*)f->Get("ee_tt_massHIST");
+        TH1D *ee_ww_massHIST = (TH1D*)f->Get("ee_ww_massHIST");
+        TH1D *ee_zz_massHIST = (TH1D*)f->Get("ee_zz_massHIST");
 
         TH1D *ee_uuh_ww_massHIST = new TH1D("subtracted", "subtracted", 350/2, 0, 350);
         *ee_uuh_ww_massHIST = *ee_uuh_massHIST - *ee_uuh_zh_massHIST;
@@ -138,17 +148,21 @@ void pretty_draw(){
 
         InitHist(ee_uuh_ww_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(248,41,104), 1001);
         InitHist(ee_uuh_zh_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(248,206,104), 1001);
-        InitHist(ee_uubb_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,206), 1001);
-        InitHist(ee_uucc_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,78), 1001);
+        InitHist(ee_qq_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,206), 1001);
+        InitHist(ee_tt_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,78), 1001);
+        InitHist(ee_ww_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,206), 1001);
+        InitHist(ee_zz_massHIST, "Di-Jet Mass (GeV)", "Events / 2 GeV", TColor::GetColor(125,206,78), 1001);
 
         ee_uuh_ww_massHIST->SetMinimum(0);
         ee_uuh_ww_massHIST->SetMaximum(ee_uuh_ww_massHIST->GetMaximum()*1.1);
-        ee_uuh_ww_massHIST->GetXaxis()->SetRangeUser(80, 140);
+        ee_uuh_ww_massHIST->GetXaxis()->SetRangeUser(70, 140);
 
         ee_uuh_ww_massHIST->Draw("hist same");
         ee_uuh_zh_massHIST->Draw("hist same");
-        ee_uubb_massHIST->Draw("hist same");
-        ee_uucc_massHIST->Draw("hist same");
+        ee_qq_massHIST->Draw("hist same");
+        ee_tt_massHIST->Draw("hist same");
+        ee_ww_massHIST->Draw("hist same");
+        ee_zz_massHIST->Draw("hist same");
 
         TLegend* leg2;
           leg2 = new TLegend(0.25, 0.70,0.95, 0.85);
@@ -157,8 +171,10 @@ void pretty_draw(){
           leg2->SetFillColor(kWhite);
           leg2->AddEntry( ee_uuh_ww_massHIST , "WW",  "F" );
           leg2->AddEntry( ee_uuh_zh_massHIST , "ZH",  "F" );
-          leg2->AddEntry( ee_uubb_massHIST , "b#bar{b}",  "F" );
-          leg2->AddEntry( ee_uucc_massHIST , "c#bar{c}",  "F" );
+          leg2->AddEntry( ee_qq_massHIST , "q#bar{q}",  "F" );
+          leg2->AddEntry( ee_tt_massHIST , "t#bar{t}",  "F" );
+          leg2->AddEntry( ee_ww_massHIST , "W+W-",  "F" );
+          leg2->AddEntry( ee_zz_massHIST , "ZZ",  "F" );
           leg2->Draw("same");
      
         TPaveText* pt2 = new TPaveText(0.3,0.55,0.4, 0.65, "tlbrNDC"); // NDC sets coords// relative to pad dimensions

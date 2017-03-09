@@ -9,6 +9,7 @@ function back {
 }
 back
 
+rm -rf graphics
 mkdir -p graphics
 
 cp input/HttStyles.cc graphics

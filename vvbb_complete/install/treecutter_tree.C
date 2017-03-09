@@ -1,4 +1,4 @@
-// E+E- Delphes Sample Processing for ee->bbvv final state
+    // E+E- Delphes Sample Processing for ee->bbvv final state
 // Alexander Andriatis and Joseph Curti
 // 20 June 2016
 
@@ -30,13 +30,16 @@
 #include <cstdio>
 #include <ctime>
 
+#include "modules/Delphes.h"                   //   |
+#include "ExRootAnalysis/ExRootTreeReader.h"   //   -  Include needed delphes headers
+#include "classes/DelphesClasses.h"            //   |
+
 #endif
 
 using namespace TMath;
 using namespace std;
 
 TString root = ".root";
-
 
 TString get_total_cuts(std::map<TString, std::pair<TString, Int_t> > cut_set){
     TString total = "";
@@ -57,122 +60,80 @@ TString get_total_cuts(std::map<TString, std::pair<TString, Int_t> > cut_set){
 }
 
 
-// Takes as input a given process with corresponding luminosity, as well as sample CME, cuts, directory location, and output file name - saves corresponding histogram in root file.
 void processtree(TString sample, Double_t weight, TLorentzVector CME, TString filename, TString directory, TString cut, std::clock_t start){
 
     //Open File
     TFile *f = new TFile(directory);
     TTree *ttree = (TTree*)f->Get(sample);
 
-    TString recohistname, masshistname;
-    recohistname = "_recoilmassHIST";
-    masshistname = "_massHIST";
+    TFile g(filename, "update");
 
-    TString histname = sample + recohistname;
-    TH1D *recoilmassHIST   = new TH1D(histname,histname,CME.M()/2,0,CME.M());
-    ttree->Project(histname, "recoilmass", cut);
+    TTree *T2 = ttree->CopyTree(cut); 
+    T2->Write();
 
-    histname = sample + masshistname;
-    TH1D *parameterHIST   = new TH1D(histname,histname,CME.M()/2,0,CME.M());
-    ttree->Project(histname, "divism", cut);
-
-    ofstream myfile3;
-    myfile3.open ("preintegral.txt", ios::app);
-        cout << "Before scale events for " << sample << " for TMVA cuts is " << recoilmassHIST->Integral() << endl;
-        myfile3 << sample << " "<< recoilmassHIST->Integral() << "\n"; //write to file
-    myfile3.close();
-
-    //Normalize Hist
-    recoilmassHIST->Scale(weight);
-    parameterHIST->Scale(weight) ;
-
-    // Writes yield of each histogram for each cut to text file
     ofstream myfile;
-    Double_t yield = recoilmassHIST->Integral(); 
-    myfile.open ("yield.txt", ios::app);
-        cout << "Yield for " << sample << " for TMVA cuts is " << yield << endl;
-        myfile << sample << " "<< yield << "\n"; //write to file
+    myfile.open ("event_counter.txt", ios::app);
+        cout << "The sample " << sample << " has " << T2->GetEntries() << " entries" << endl;
+        myfile << sample << " " << T2->GetEntries() << "\n"; //write to file
     myfile.close();
 
-    ofstream myfile2;
-    myfile2.open ("event_count.txt", ios::app);
-        cout << "Number events for " << sample << " for TMVA cuts is " << ttree->GetEntries() << endl;
-        myfile2 << sample << " "<< ttree->GetEntries() << "\n"; //write to file
-    myfile2.close();
-
-    if (recoilmassHIST->Integral() == 0){
-        recoilmassHIST->Fill(0);
-    }
-    if (parameterHIST->Integral() == 0){
-        parameterHIST->Fill(0);
-    }
-
-    TFile g(filename, "update");
-    recoilmassHIST->Write();
-    parameterHIST->Write();
     g.Close();
 }
 
 // For a simulated collision with multiple physics processes as individual delphes files, calculates relevant histograms into one root file. 
-void tree_hist(){
+void treecutter_tree(){
     TLorentzVector CME = {0,0,0,350}; // Defines center of mass energy
+    Int_t luminosity = 2600; // Defines luminosity
     TString filename = "ee_350.root"; // Filename for created histogram collection
-    TString directory = "TREEPATH/ee_350.root"; // Directory of stored tree samples
-
-    TFile f(filename, "recreate");
-    f.Close();
+    TString directory = "TREEPATH/ee_350.root"; // Directory of stored delphes samples
 
     TString recoilmass =    "(recoilmass > 0 && recoilmass < 350)";
-    TString vism =          "(vism > 102 && vism < 185)";
-    TString vispt =         "(vispt > 0 && vispt < 350)";
-    TString vispz =         "(vispz > 0 && vispz < 140)";
-    TString acoplanarity =  "(acoplanarity > 0 && acoplanarity < 1.59)";
-    TString labangle  =     "(labangle > 0 && labangle < 3.96)";
-    TString numtracks =     "(numtracks > 1 && numtracks < 51)";
+    TString vism =          "(vism > 99 && vism < 140)";
+    TString vispt =         "(vispt > 1 && vispt < 140)";
+    TString vispz =         "(vispz > 0 && vispz < 130)";
+    TString acoplanarity =  "(acoplanarity > 0 && acoplanarity < 1.58)";
+    TString labangle  =     "(labangle > 1.54 && labangle < 3)";
+    TString numtracks =     "(numtracks > 6 && numtracks < 40)";
     TString numjets =       "(numjets == 2)";
     TString btag =          "(btag == 2)";
     TString numleptons =    "(numleptons == 0)";
     TString costheta1 =     "(costheta1 > 0 && costheta1 < 0.989)";
     TString costheta2 =     "(costheta2 > 0 && costheta2 < 0.988)";
     TString ivism =         "(ivism > 0 && ivism < 350)";
-    
 
     std::map<TString, std::pair<TString, Int_t> > cuts ={
     { "recoilmass", std::pair<TString, Int_t> (recoilmass,      1)},
-    { "vism", std::pair<TString, Int_t> (vism,           1)},
-    { "vispt", std::pair<TString, Int_t> (vispt,          1)},
-    { "vispz", std::pair<TString, Int_t> (vispz,          1)}, 
-    { "acoplanarity", std::pair<TString, Int_t> (acoplanarity,   1)},
-    { "labangle", std::pair<TString, Int_t> (labangle,       1)},
-    { "numjets", std::pair<TString, Int_t> (numjets,        1)},
-    { "numtracks", std::pair<TString, Int_t> (numtracks,      1)},
-    { "btag", std::pair<TString, Int_t> (btag,           1)},
-    { "numleptons", std::pair<TString, Int_t> (numleptons, 1)},
-    { "costheta1", std::pair<TString, Int_t> (costheta1, 0)},
-    { "costheta2", std::pair<TString, Int_t> (costheta2, 0)},
-    { "ivism", std::pair<TString, Int_t> (ivism, 0)}
+    { "vism", std::pair<TString, Int_t> (vism,                  0)},
+    { "vispt", std::pair<TString, Int_t> (vispt,                0)},
+    { "vispz", std::pair<TString, Int_t> (vispz,                0)}, 
+    { "acoplanarity", std::pair<TString, Int_t> (acoplanarity,  0)},
+    { "labangle", std::pair<TString, Int_t> (labangle,          0)},
+    { "numjets", std::pair<TString, Int_t> (numjets,            1)},
+    { "numtracks", std::pair<TString, Int_t> (numtracks,        0)},
+    { "btag", std::pair<TString, Int_t> (btag,                  1)},
+    { "numleptons", std::pair<TString, Int_t> (numleptons,      1)},
+    { "costheta1", std::pair<TString, Int_t> (costheta1,        0)},
+    { "costheta2", std::pair<TString, Int_t> (costheta2,        0)},
+    { "ivism", std::pair<TString, Int_t> (ivism,                0)}
     };
 
-
-    
-    std::map<TString, Double_t> samples ={ // Defines which samples to process and their corresponding cross sections {"sample name", weight}
-//    {"ee_uuh_ww", 0.463372},
-    {"ee_uuh", 0.937759},
-    {"ee_uuh_zh", 0.484296},
+    std::map<TString, Double_t> samples ={ // Defines which samples to process and their corresponding cross sections {"sample name", cross section}
+    { "ee_uuh_ww", 0},
+    { "ee_uuh", 1},
+    { "ee_uuh_zh", 0},
     {"ee_qq", 0},
     {"ee_tt", 0},
     {"ee_ww", 0},
     {"ee_zz", 0}
-//    {"ee_qq", 691.383},
-//    {"ee_qqa", 1284.99},
-//    {"ee_qqqq", 14.7282},
-//    {"ee_qqtt", 14.7282},
-//    {"ee_qqll", 17.9719},
-//    {"ee_qqlv", 220.225},
-//    {"ee_uuqq", 6.30769}    
-    }; 
-
-
+    // { "ee_uubb", 1},
+    // { "ee_uucc", 1},
+    // { "ee_uuqq", 0},
+    // { "ee_qqll", 0},
+    // { "ee_qqlv", 0},
+    // { "ee_qqqq", 0},
+    // { "ee_qq",  0},
+    // { "ee_qqa", 0}
+    };
 
 
     std::clock_t start;
@@ -188,8 +149,10 @@ void tree_hist(){
             processtree(process->first, process->second, CME, filename, directory, total_cut, start);
         }
     }
+    
 
     double duration;
     duration = (( std::clock() - start ) / (double) CLOCKS_PER_SEC)/60;
     cout<< "Process completed in "<< duration << " minutes" <<'\n';
 }
+

@@ -34,19 +34,19 @@ using namespace TMath;
 using namespace std;
 
 //Main Function
-void hist_draw(){
+void n1_draw(){
 
-    TString file = "ee_350";
+    TString file = "ee_350_cutSSS";
     TString root = ".root";
     TString name, histtype, filename;
 
     std::map<TString, Int_t > histnames ={ // Defines which samples to process}
         { "ee_uuh_ww", 0},
-        { "ee_uuh_zh", 1},
-        { "ee_qq", 1},
-        { "ee_tt", 1},
-        { "ee_ww", 1},
-        { "ee_zz", 1},
+        { "ee_uuh_zh", 0},
+        { "ee_qq", 0},
+        { "ee_tt", 0},
+        { "ee_ww", 0},
+        { "ee_zz", 0},
         // { "ee_uubb", 1},
         // { "ee_uucc", 1},
         // { "ee_qq", 0},
@@ -57,36 +57,60 @@ void hist_draw(){
         // { "ee_qqqq", 0},
         // { "ee_qqtt", 0},
         { "ee_uuh", 1},
-        { "subtracted", 2},
-        { "data_obs", 2}
+        { "subtracted", 0},
+        { "data_obs", 0}
+    };
+
+    std::map<Int_t, TString> parameters ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
+        { 1, "vism"},
+        { 2, "vispt"},
+        { 3, "vispz"},
+        { 4, "acoplanarity"},
+        { 5, "labangle"},
+        { 6, "numjets"},
+        { 7, "numtracks"},
+        { 8, "btag"},
+        { 9, "numleptons"},
+        { 10, "costheta1"},
+        { 11, "costheta2"},
+        { 12, "ivism"}
     };
 
     std::map<Int_t, TString> histtypes ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
-        { 2, "_recoilmassHIST"},
-        { 1, "_massHIST"}
+        { 1, "_recoilmassHIST"},
+        { 2, "_parameterHIST"},
+        { 3, "_recoilmassHIST_all"},
+        { 4, "_parameterHIST_all"}
     };
 
     std::map<TString, TString > titles ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
-        { "_recoilmassHIST", "Missing Mass of Di-Jet System @ #sqrt{s} = 350 GeV"},
-        { "_massHIST" , "Di-Jet Mass @ #sqrt{s} = 350 GeV"}
+        { "_recoilmassHIST", "Reconstructed Mass of Di-Jet System @ #sqrt{s} = 350 GeV, n-1 cut"},
+        { "_parameterHIST" , " @ #sqrt{s} = 350 GeV, n-1 cut"},
+        { "_recoilmassHIST_all", "Reconstructed Mass of Di-Jet System @ #sqrt{s} = 350 GeV, all cuts"},
+        { "_parameterHIST_all" , " @ #sqrt{s} = 350 GeV, all cuts"}
     };
 
     std::map<TString, TString > xtitles ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
-        { "_recoilmassHIST", "Missing Mass (GeV)"},
-        { "_massHIST", "Di-Jet Mass (GeV)"}
+        { "_recoilmassHIST", "Reconstructed Mass (GeV)"},
+        { "_parameterHIST", " "},
+        { "_recoilmassHIST_all", "Reconstructed Mass (GeV)"},
+        { "_parameterHIST_all", " "}
     };
 
     std::map<TString, TString > ytitles ={ // Defines which samples to process and their corresponding cross sections {index, <"sample name", cross section>}
         { "_recoilmassHIST", "Count"},
-        { "_massHIST", "Count"}
+        { "_parameterHIST", "Count"},
+        { "_recoilmassHIST_all", "Count"},
+        { "_parameterHIST_all", "Count"}
     };
 
     
     // Plots the signal and background di-jet mass and missing mass
     TCanvas *can = new TCanvas(file, file, 1280, 720);
-    can->Divide(1, 2);
+    can->Divide(2, 2);
+    
 
-    for (Int_t counter=1; counter<3; counter++){
+    for (Int_t counter=1; counter<5; counter++){
         histtype = histtypes[counter];
         can->cd(counter);
 
@@ -109,6 +133,7 @@ void hist_draw(){
             (histograms)["ee_uuh_ww"]->SetName(subname);
         }
 
+        
         Double_t largest=0;
         std::map<TString, TH1D*>::iterator hists;
         for ( hists = histograms.begin(); hists != histograms.end(); hists++){
@@ -118,12 +143,21 @@ void hist_draw(){
             }
         }
         largest = 1.1*largest;
-
+        
         std::map<TString, TH1D*>::iterator histsit;
         for (histsit = histograms.begin(); histsit != histograms.end(); histsit++){
             name = histsit->first;
-            (histograms)[name]->SetTitle(titles[histtype]);
-            (histograms)[name]->GetXaxis()->SetTitle(xtitles[histtype]);
+            if (histtype == "_recoilmassHIST" || histtype == "_recoilmassHIST_all"){
+                (histograms)[name]->SetTitle(titles[histtype]);
+                (histograms)[name]->GetXaxis()->SetTitle(xtitles[histtype]);
+            }
+            else {
+                TString title = parameters[SSS] + titles[histtype];
+                TString xtitle = parameters[SSS] + xtitles[histtype];
+                (histograms)[name]->SetTitle(title);
+                (histograms)[name]->GetXaxis()->SetTitle(xtitle);
+
+            }
             (histograms)[name]->GetYaxis()->SetTitle(ytitles[histtype]);
             (histograms)[name]->SetMinimum(0);
             (histograms)[name]->SetMaximum(largest);
@@ -139,6 +173,15 @@ void hist_draw(){
         }
 
         name = "ee_uuh_zh";
+        if ((histograms)[name]){
+        (histograms)[name]->SetLineColor(kMagenta);
+        (histograms)[name]->SetFillStyle(3004);
+        (histograms)[name]->SetFillColor(kMagenta);
+        (histograms)[name]->SetStats(kFALSE);
+        (histograms)[name]->Draw("hist same");
+        }
+
+        name = "ee_uuh";
         if ((histograms)[name]){
         (histograms)[name]->SetLineColor(kMagenta);
         (histograms)[name]->SetFillStyle(3004);
@@ -227,8 +270,7 @@ void hist_draw(){
         (histograms)[name]->SetStats(kFALSE);
         (histograms)[name]->Draw("hist same");
         }
-
-
+        
 
         TLegend* leg = new TLegend(0.13,0.69,0.25,0.89);
         std::map<TString, TH1D*>::iterator histdrawer;
@@ -238,18 +280,19 @@ void hist_draw(){
             leg->AddEntry((histograms)[name],name,"f");
         }
         leg->Draw();
+        
 
-        TFile *g = new TFile(filename, "update"); // Specifies the root files which contain the generated histograms
-            if (histnames["data_obs"]==2){
-                histograms.insert ( std::pair<TString, TH1D*> ("data_obs", new TH1D("data_obs", "data_obs", 350/2, 0, 350)));
-                *((histograms)["data_obs"]) = *((histograms)["ee_uuh_ww"]);
-                (histograms)["data_obs"]->SetName("data_obs");
-                (histograms)["data_obs"]->Write();
-            }
-            if (histnames["subtracted"]==2){
-                (histograms)["ee_uuh_ww"]->Write();
-            }
-        g->Close();
+        // TFile *g = new TFile(filename, "update"); // Specifies the root files which contain the generated histograms
+        //     if (histnames["data_obs"]==2){
+        //         histograms.insert ( std::pair<TString, TH1D*> ("data_obs", new TH1D("data_obs", "data_obs", 350/2, 0, 350)));
+        //         *((histograms)["data_obs"]) = *((histograms)["ee_uuh_ww"]);
+        //         (histograms)["data_obs"]->SetName("data_obs");
+        //         (histograms)["data_obs"]->Write();
+        //     }
+        //     if (histnames["subtracted"]==2){
+        //         (histograms)["subtracted"]->Write();
+        //     }
+        // g->Close();
 
     }
         // Saves as PDF

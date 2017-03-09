@@ -1,4 +1,4 @@
-    // E+E- Delphes Sample Processing for ee->bbvv final state
+// E+E- Delphes Sample Processing for ee->bbvv final state
 // Alexander Andriatis and Joseph Curti
 // 20 June 2016
 
@@ -54,7 +54,7 @@ void processsimulation(TString sample, Double_t crosssection, TLorentzVector CME
     ExRootTreeReader *treeReader = new ExRootTreeReader(&chain); // Reads sample from delphes root fiile
 
     //Branches to be read from the collision file
-    std::array<TString, 9> branchnames = {(TString)"Muon",(TString)"Electron",(TString)"Photon",(TString)"Jet",(TString)"Tower",(TString)"Track",(TString)"EFlowTrack",(TString)"EFlowPhoton",(TString)"EFlowNeutralHadron"};
+    std::array<TString, 10> branchnames = {(TString)"Muon",(TString)"Electron",(TString)"Photon",(TString)"Jet",(TString)"GenJet",(TString)"Tower",(TString)"Track",(TString)"EFlowTrack",(TString)"EFlowPhoton",(TString)"EFlowNeutralHadron"};
     std::map<TString, TClonesArray*> branches;
     for (int i=0; i<(int)branchnames.size(); i++){
         branches.insert ( std::pair<TString, TClonesArray*> (branchnames[i], treeReader->UseBranch(branchnames[i])));
@@ -138,7 +138,7 @@ void parameter_tree(){
     TString filename = "ee_350.root"; // Filename for created histogram collection
     TString directory = "SAMPLEPATH"; // Directory of stored delphes samples
 
-    std::map<TString, Int_t> cut ={ // Initializes cuts {cut name, 1 = on}
+    std::map<TString, Int_t> cut ={ // Initializes cuts {cut name, integer does not matter here}
         { "recoilmass" , 0},
         { "vism" , 0},
         { "vise" , 0},
@@ -152,21 +152,31 @@ void parameter_tree(){
         { "numtracks", 0},
         { "numjets", 0},
         { "costheta1", 0},
-        { "costheta2", 0}
+        { "costheta2", 0},
+        { "ivism", 0},
+        { "jet1res", 0},
+        { "jet2res", 0},
+        { "genjet1E", 0},
+        { "genjet2E", 0}
     };
 
     std::map<TString, Double_t> samples ={ // Defines which samples to process and their corresponding cross sections {"sample name", cross section}
-    { "ee_uuh_ww", 30.68*0.5809},
-    { "ee_uuh", 52.26*0.5809},
-    { "ee_uuh_zh", 26.97*0.5809},
-    { "ee_uubb", 66.58},
-    { "ee_uucc", 72.98},
-    { "ee_uuqq", 147.60},
-    { "ee_qqll", 170.45},
-    { "ee_qqlv", 3719.51},
-    { "ee_qqqq", 566.47},
-    { "ee_qq",  5593.92},
-    { "ee_qqa", 2490.43}
+//    { "ee_uuh_ww", 30.68*0.5809},
+    { "ee_uuh", 52.227*0.5809},
+    { "ee_uuh_zh", 26.975*0.5809},
+    { "ee_qq", 13772},
+    { "ee_tt", 154},
+    { "ee_ww", 25972},
+    { "ee_zz", 5584}
+    // { "ee_uubb", 66.532},
+    // { "ee_uucc", 72.965}
+//    { "ee_uuqq", 203.44},
+//    { "ee_qqll", 170.45},
+//    { "ee_qqlv", 3719.51},
+//    { "ee_qqqq", 566.47},
+//    { "ee_qqtt", 566.47},
+//    { "ee_qq",  21155},
+//    { "ee_qqa", 36432}
     };
 
     std::map<TString, Int_t> particletype ={ // Initializes particles {particle type, 1 = on}
