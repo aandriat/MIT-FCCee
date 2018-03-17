@@ -20,8 +20,8 @@ Manual Sample Generation:
   3. Delphes (Detector Simulator)
       a) Can set detector parameter by changing delphes card
       b) to run do:
-        ./DelphesHepMC cards/delphes_card_ILD.tcl delphes.root hepmc.root
-        ./<path to delphes card> <output>.root <input>.dat
+        ./DelphesHepMC cards/delphes_card_ILD.tcl delphes.root hepmc.dat
+        ./DelphesHepMC <path to delphes card> <output>.root <input>.dat
 
   Alternatively, one can use madgraph instead of the whizard, pythia combination. Madgraph does not simulate initial state radiation
   effects as well as whizard, but is more user friendly. Madgraph can display the Feynman diagrams of the processes in the sample
