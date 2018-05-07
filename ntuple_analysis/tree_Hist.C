@@ -300,7 +300,7 @@ void draw_hist(TString input_name, Double_t lumi = 10.0, std::array<int, 5> binn
     // pt2->Draw();       //to draw your text object
     if (analysis_type == 0) { outputName = "hists/Misc/plots/" + var + "Plot"; }
     can->Modified();
-    can->Print(outputName + ".gif"); //Automatically saves plot to a .gif file with the same name as the histogram
+    can->Print(outputName + ".pdf"); //Automatically saves plot to a .pdf file with the same name as the histogram
 
 
     // TCanvas *summary = MakeCanvas("Summary", "summary", 800, 600);
